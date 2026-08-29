@@ -14,6 +14,7 @@ import { PerksBar } from "./components/PerksBar/PerksBar";
 import { Footer } from "./components/Footer/Footer";
 import { AdminDashboard } from "./components/AdminDashboard/AdminDashboard";
 import { AboutPage } from "./components/AboutPage/AboutPage";
+import { WhatsAppButton } from "./components/WhatsAppButton/WhatsAppButton";
 
 export default function CatalogStore() {
   const route = useHashRoute();
@@ -77,6 +78,8 @@ export default function CatalogStore() {
       )}
 
       <Footer />
+
+      <WhatsAppButton hidden={cartOpen} productName={routedProduct?.name} />
 
       <CartDrawer
         open={cartOpen}

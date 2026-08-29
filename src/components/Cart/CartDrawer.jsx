@@ -46,15 +46,27 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
   const confirmOrder = async () => {
     const method = PAYMENT_METHODS.find((m) => m.id === payMethod);
     if (!method) { setError("Elige un método de pago para confirmar."); return; }
+
+    // Claim the tab synchronously, while we are still inside the click.
+    // `await` below ends the user-gesture window, and mobile Safari blocks
+    // any window.open() made after that point — so open first, aim later.
+    const tab = window.open("", "_blank");
+
     setProcessing(true);
     const result = await method.process({ items, form, totals });
     setProcessing(false);
-    if (!result.ok) { setError(result.error || "No se pudo procesar el pago."); return; }
+    if (!result.ok) {
+      tab?.close();
+      setError(result.error || "No se pudo procesar el pago.");
+      return;
+    }
+
     // Today every enabled method confirms via WhatsApp.
-    // An online gateway would instead redirect: window.location.href = result.paymentUrl
+    // An online gateway would instead redirect: tab.location.href = result.paymentUrl
     const link = buildWhatsAppLink(items, form, payMethod, totals);
     setWaLink(link);
-    window.open(link, "_blank");
+    if (tab) tab.location.href = link;
+    else window.location.href = link; // popup blocked — go in this tab instead
     setView("done");
   };
 

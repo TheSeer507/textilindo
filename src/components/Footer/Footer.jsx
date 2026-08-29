@@ -1,5 +1,6 @@
 import logo from "../../assets/textilindologo.jpg";
 import { CONFIG } from "../../config/store";
+import { buildChatLink } from "../../utils/whatsapp";
 
 export function Footer() {
   return (
@@ -17,9 +18,15 @@ export function Footer() {
           <p className="font-display font-semibold text-white">Enlaces</p>
           <div className="mt-3 flex flex-col gap-1 text-sm sm:items-end">
             <a href="#about" className="hover:text-brand-accent transition-colors">Acerca de Nosotros</a>
-            <p className="text-slate-400">
-              Ventas y soporte por WhatsApp · <a href="#admin" className="hover:text-brand-accent">·</a>
-            </p>
+            <a
+              href={buildChatLink()}
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-brand-accent transition-colors"
+            >
+              Ventas y soporte por WhatsApp
+            </a>
+            <a href="#admin" className="text-slate-600 hover:text-brand-accent transition-colors" aria-label="Panel interno">·</a>
           </div>
         </div>
       </div>
