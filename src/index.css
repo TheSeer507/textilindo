@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #ff0000;
+  --color-brand-primary-dark: #cc0000;
+  --color-brand-accent: #ffde00;
+  --color-brand-accent-dark: #e6c200;
+  --color-brand-surface: #fff9e0;
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+}
