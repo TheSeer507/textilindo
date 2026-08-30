@@ -1,6 +1,6 @@
 export const CONFIG = {
   storeName: "Textilindo",
-  whatsappNumber: "50760000000", // ← your number, digits only
+  whatsappNumber: "50769413385", // número de WhatsApp Business de la tienda
   currency: "$",
   yappyHandle: "@textilindo", // ← still a placeholder, swap for your real Yappy handle
   freeShippingOver: 50,

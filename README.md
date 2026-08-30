@@ -79,8 +79,7 @@ Después de fijar el dominio, actualiza las URLs en `index.html`
 
 ## Pendientes antes de salir al aire
 
-- [ ] **Número de WhatsApp real** en `src/config/store.js` — ahora es el
-      placeholder `50760000000` y ningún pedido llega.
+- [x] ~~Número de WhatsApp real~~ — listo: `50769413385` (WhatsApp Business).
 - [ ] **Handle de Yappy real** en `src/config/store.js` (ahora `@textilindo`).
 - [ ] Subir `public/og-image.jpg` (1200×630) para la vista previa al compartir
       el link por WhatsApp o Facebook.

@@ -3,6 +3,8 @@ import { money, CONFIG } from "../../config/store";
 import { PRODUCTS, LOW_STOCK_THRESHOLD } from "../../data/products";
 import { ImageGallery } from "../ImageGallery/ImageGallery";
 import { ProductCard } from "../ProductCard/ProductCard";
+import { WhatsAppGlyph } from "../icons/WhatsAppGlyph";
+import { buildChatLink } from "../../utils/whatsapp";
 
 export function ProductPage({ product, cart, onAdd }) {
   useEffect(() => {
@@ -50,22 +52,42 @@ export function ProductPage({ product, cart, onAdd }) {
 
           <p className="text-slate-600 mt-5 leading-relaxed max-w-md">{product.desc}</p>
 
-          <button
-            onClick={() => onAdd(product.id)}
-            disabled={outOfStock || atStockLimit}
-            className={
-              "mt-8 font-black py-4 px-8 rounded-2xl transition " +
-              (outOfStock || atStockLimit
-                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                : "bg-brand-accent hover:bg-brand-accent-dark text-brand-primary")
-            }
-          >
-            {outOfStock
-              ? "Agotado"
-              : atStockLimit
-              ? `Máximo disponible (${product.stock})`
-              : "Agregar al carrito"}
-          </button>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => onAdd(product.id)}
+              disabled={outOfStock || atStockLimit}
+              className={
+                "font-black py-4 px-8 rounded-2xl transition " +
+                (outOfStock || atStockLimit
+                  ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                  : "bg-brand-accent hover:bg-brand-accent-dark text-brand-primary")
+              }
+            >
+              {outOfStock
+                ? "Agotado"
+                : atStockLimit
+                ? `Máximo disponible (${product.stock})`
+                : "Agregar al carrito"}
+            </button>
+
+            {/* Cuando el producto está agotado, consultar es la única acción
+                útil que queda — así que ahí se vuelve el botón principal. */}
+            <a
+              href={buildChatLink({ productName: product.name, outOfStock })}
+              target="_blank"
+              rel="noreferrer"
+              className={
+                "inline-flex items-center justify-center gap-2 font-black py-4 px-6 rounded-2xl transition " +
+                "focus:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40 " +
+                (outOfStock
+                  ? "bg-[#25D366] hover:bg-[#1ebe5a] text-white"
+                  : "border-2 border-[#25D366] text-[#128C4A] hover:bg-[#25D366] hover:text-white")
+              }
+            >
+              <WhatsAppGlyph className="w-5 h-5" />
+              {outOfStock ? "Avisarme por WhatsApp" : "Consultar por WhatsApp"}
+            </a>
+          </div>
 
           <p className="mt-4 text-xs text-slate-400">Garantía de 30 días · Entrega 24–48 h</p>
         </div>

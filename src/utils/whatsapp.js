@@ -21,10 +21,17 @@ export function waHref(text) {
    `productName` makes the greeting specific when the customer is
    looking at a product, so the rep knows what they're asking about.
 -------------------------------------------------------------- */
-export function buildChatLink({ productName } = {}) {
-  const text = productName
-    ? `¡Hola ${CONFIG.storeName}! 👋 Me interesa *${productName}*. ¿Me pueden dar más información?`
-    : `¡Hola ${CONFIG.storeName}! 👋 Quisiera más información sobre sus productos.`;
+export function buildChatLink({ productName, outOfStock } = {}) {
+  const hola = `¡Hola ${CONFIG.storeName}! 👋`;
+  let text;
+  if (productName && outOfStock) {
+    // Agotado: la pregunta real es cuándo vuelve, no los detalles.
+    text = `${hola} Vi que *${productName}* está agotado. ¿Cuándo lo tendrán disponible?`;
+  } else if (productName) {
+    text = `${hola} Me interesa *${productName}*. ¿Me pueden dar más información?`;
+  } else {
+    text = `${hola} Quisiera más información sobre sus productos.`;
+  }
   return waHref(text);
 }
 
