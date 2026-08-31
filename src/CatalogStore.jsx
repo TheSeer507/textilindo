@@ -44,7 +44,13 @@ export default function CatalogStore() {
         <AboutPage />
       ) : productMatch ? (
         routedProduct ? (
-          <ProductPage product={routedProduct} cart={cart} onAdd={addToCart} />
+          <ProductPage
+            product={routedProduct}
+            cart={cart}
+            onAdd={addToCart}
+            onChangeQty={changeQty}
+            onRemove={removeItem}
+          />
         ) : (
           <ProductNotFound />
         )
@@ -65,6 +71,8 @@ export default function CatalogStore() {
                   product={p}
                   inCartQty={cart[p.id] || 0}
                   onAdd={addToCart}
+                  onChangeQty={changeQty}
+                  onRemove={removeItem}
                 />
               ))}
             </div>

@@ -6,7 +6,7 @@ import { ProductCard } from "../ProductCard/ProductCard";
 import { WhatsAppGlyph } from "../icons/WhatsAppGlyph";
 import { buildChatLink } from "../../utils/whatsapp";
 
-export function ProductPage({ product, cart, onAdd }) {
+export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
   useEffect(() => {
     document.title = `${product.name} — ${CONFIG.storeName}`;
     return () => { document.title = CONFIG.storeName; };
@@ -98,7 +98,14 @@ export function ProductPage({ product, cart, onAdd }) {
           <h2 className="font-display font-semibold text-2xl tracking-tight mb-6">Más de {product.category}</h2>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
             {related.map((p) => (
-              <ProductCard key={p.id} product={p} inCartQty={cart[p.id] || 0} onAdd={onAdd} />
+              <ProductCard
+                key={p.id}
+                product={p}
+                inCartQty={cart[p.id] || 0}
+                onAdd={onAdd}
+                onChangeQty={onChangeQty}
+                onRemove={onRemove}
+              />
             ))}
           </div>
         </div>
