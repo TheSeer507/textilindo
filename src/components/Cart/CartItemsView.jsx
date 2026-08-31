@@ -16,9 +16,21 @@ export function CartItemsView({ items, totals, changeQty, removeItem }) {
     <div className="space-y-4">
       {items.map(({ product, qty }) => (
         <div key={product.id} className="flex gap-3 border border-slate-200 rounded-2xl p-3">
-          <div className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl shrink-0" style={{ background: product.bg }}>
-            {product.emoji}
-          </div>
+          {/* La foto real del producto: en el carrito es lo que le confirma
+              al cliente que agregó lo que creía. El emoji sobre degradado
+              queda solo como respaldo si un producto no tiene fotos. */}
+          {product.images?.length ? (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              loading="lazy"
+              className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-200"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl shrink-0" style={{ background: product.bg }}>
+              {product.emoji}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm text-slate-900 leading-snug">{product.name}</p>
             <p className="font-black text-slate-900 mt-1">{money(product.price * qty)}</p>

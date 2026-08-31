@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { QuantityStepper } from "../QuantityStepper/QuantityStepper";
 import { money } from "../../config/store";
 import { LOW_STOCK_THRESHOLD } from "../../data/products";
 
@@ -61,48 +61,13 @@ export function ProductCard({ product, inCartQty, onAdd, onChangeQty, onRemove }
             {outOfStock ? "Agotado" : "Agregar"}
           </button>
         ) : (
-          <div className="mt-auto flex items-center gap-1.5">
-            <button
-              onClick={() => onRemove(product.id)}
-              aria-label={`Quitar ${product.name} del carrito`}
-              title="Quitar del carrito"
-              className="shrink-0 w-8 sm:w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors"
-            >
-              <Trash2 size={15} strokeWidth={2} />
-            </button>
-
-            <div className="flex-1 flex items-center justify-between rounded-xl border border-brand-primary bg-brand-surface h-9 px-1">
-              <button
-                onClick={() => onChangeQty(product.id, -1)}
-                aria-label={`Quitar una unidad de ${product.name}`}
-                className="shrink-0 w-6 sm:w-7 h-7 flex items-center justify-center rounded-lg text-brand-primary hover:bg-brand-primary hover:text-white transition-colors"
-              >
-                <Minus size={14} strokeWidth={3} />
-              </button>
-
-              <span
-                aria-live="polite"
-                className="font-black text-sm text-brand-primary tabular-nums text-center flex-1 min-w-0"
-              >
-                {inCartQty}
-              </span>
-
-              <button
-                onClick={() => onAdd(product.id)}
-                disabled={atStockLimit}
-                aria-label={`Agregar otra unidad de ${product.name}`}
-                title={atStockLimit ? `Solo quedan ${product.stock}` : undefined}
-                className={
-                  "shrink-0 w-6 sm:w-7 h-7 flex items-center justify-center rounded-lg transition-colors " +
-                  (atStockLimit
-                    ? "text-slate-300 cursor-not-allowed"
-                    : "text-brand-primary hover:bg-brand-primary hover:text-white")
-                }
-              >
-                <Plus size={14} strokeWidth={3} />
-              </button>
-            </div>
-          </div>
+          <QuantityStepper
+            product={product}
+            qty={inCartQty}
+            onAdd={onAdd}
+            onChangeQty={onChangeQty}
+            onRemove={onRemove}
+          />
         )}
 
         {atStockLimit && inCartQty > 0 && (

@@ -4,6 +4,7 @@ import { PRODUCTS, LOW_STOCK_THRESHOLD } from "../../data/products";
 import { ImageGallery } from "../ImageGallery/ImageGallery";
 import { ProductCard } from "../ProductCard/ProductCard";
 import { WhatsAppGlyph } from "../icons/WhatsAppGlyph";
+import { QuantityStepper } from "../QuantityStepper/QuantityStepper";
 import { buildChatLink } from "../../utils/whatsapp";
 
 export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
@@ -53,22 +54,33 @@ export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
           <p className="text-slate-600 mt-5 leading-relaxed max-w-md">{product.desc}</p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => onAdd(product.id)}
-              disabled={outOfStock || atStockLimit}
-              className={
-                "font-black py-4 px-8 rounded-2xl transition " +
-                (outOfStock || atStockLimit
-                  ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                  : "bg-brand-accent hover:bg-brand-accent-dark text-brand-primary")
-              }
-            >
-              {outOfStock
-                ? "Agotado"
-                : atStockLimit
-                ? `Máximo disponible (${product.stock})`
-                : "Agregar al carrito"}
-            </button>
+            {/* Igual que en la tarjeta: una vez que hay unidades, el botón
+                cede su lugar al control de cantidad. */}
+            {inCartQty > 0 && !outOfStock ? (
+              <div className="sm:w-64">
+                <QuantityStepper
+                  product={product}
+                  qty={inCartQty}
+                  onAdd={onAdd}
+                  onChangeQty={onChangeQty}
+                  onRemove={onRemove}
+                  size="lg"
+                />
+              </div>
+            ) : (
+              <button
+                onClick={() => onAdd(product.id)}
+                disabled={outOfStock}
+                className={
+                  "h-14 font-black px-8 rounded-2xl transition " +
+                  (outOfStock
+                    ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                    : "bg-brand-accent hover:bg-brand-accent-dark text-brand-primary")
+                }
+              >
+                {outOfStock ? "Agotado" : "Agregar al carrito"}
+              </button>
+            )}
 
             {/* Cuando el producto está agotado, consultar es la única acción
                 útil que queda — así que ahí se vuelve el botón principal. */}
@@ -77,7 +89,7 @@ export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
               target="_blank"
               rel="noreferrer"
               className={
-                "inline-flex items-center justify-center gap-2 font-black py-4 px-6 rounded-2xl transition " +
+                "inline-flex items-center justify-center gap-2 h-14 font-black px-6 rounded-2xl transition " +
                 "focus:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40 " +
                 (outOfStock
                   ? "bg-[#25D366] hover:bg-[#1ebe5a] text-white"
@@ -88,6 +100,12 @@ export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
               {outOfStock ? "Avisarme por WhatsApp" : "Consultar por WhatsApp"}
             </a>
           </div>
+
+          {atStockLimit && inCartQty > 0 && (
+            <p className="mt-3 text-xs font-semibold text-orange-600">
+              Ya tienes el máximo disponible ({product.stock}) en tu carrito.
+            </p>
+          )}
 
           <p className="mt-4 text-xs text-slate-400">Garantía de 30 días · Entrega 24–48 h</p>
         </div>
