@@ -8,3 +8,45 @@
   --color-brand-surface: #fff9e0;
   --font-display: "Playfair Display", ui-serif, Georgia, serif;
 }
+
+/* ==============================================================
+   BASE MÓVIL
+============================================================== */
+
+/* Nada debe empujar la página a lo ancho: un solo elemento que se pase
+   provoca scroll horizontal y da la sensación de "escala rota". */
+html, body { overflow-x: hidden; }
+
+/* iOS infla el texto en horizontal; lo dejamos en el tamaño diseñado. */
+html { -webkit-text-size-adjust: 100%; }
+
+/* ==============================================================
+   ANIMACIONES
+============================================================== */
+
+/* Rebote del contador del carrito cuando entra un producto. */
+@keyframes cart-bump {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.45); }
+  70%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+.animate-cart-bump { animation: cart-bump 0.45s ease-out; }
+
+/* Respeta a quien pidió menos movimiento en el sistema operativo. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Toast: entra, se sostiene y sale en una sola animación de 3s. */
+@keyframes toast {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.96); }
+  8%   { opacity: 1; transform: translateY(0) scale(1); }
+  88%  { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(14px) scale(0.96); }
+}
+.animate-toast { animation: toast 3s ease-in-out both; }

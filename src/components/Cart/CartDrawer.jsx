@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { CONFIG, money } from "../../config/store";
 import { PAYMENT_METHODS } from "../../data/paymentMethods";
 import { buildWhatsAppLink } from "../../utils/whatsapp";
+import { normalizePanamaPhone } from "../../utils/phone";
 import { CartItemsView } from "./CartItemsView";
 import { ShippingForm } from "./ShippingForm";
 import { PaymentMethods } from "./PaymentMethods";
@@ -41,7 +42,10 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
   }, [items]);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const shippingValid = form.name.trim() && form.phone.trim() && form.province && form.city.trim();
+  // El teléfono se guarda siempre como 8 dígitos limpios, sin el 507.
+  const setPhone = (e) => setForm((f) => ({ ...f, phone: normalizePanamaPhone(e.target.value) }));
+  const shippingValid =
+    form.name.trim() && form.phone.length === 8 && form.province && form.city.trim();
 
   const confirmOrder = async () => {
     const method = PAYMENT_METHODS.find((m) => m.id === payMethod);
@@ -92,7 +96,7 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
           {view === "cart" && (
             <CartItemsView items={items} totals={totals} changeQty={changeQty} removeItem={removeItem} />
           )}
-          {view === "shipping" && <ShippingForm form={form} set={set} error={error} />}
+          {view === "shipping" && <ShippingForm form={form} set={set} setPhone={setPhone} error={error} />}
           {view === "payment" && (
             <PaymentMethods payMethod={payMethod} setPayMethod={setPayMethod} setError={setError} error={error} />
           )}
@@ -120,7 +124,17 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
               <div className="flex gap-3">
                 <button onClick={() => setView("cart")} className="px-5 py-4 rounded-2xl border border-slate-300 font-semibold hover:bg-slate-50">←</button>
                 <button
-                  onClick={() => { if (!shippingValid) { setError("Completa los campos marcados con *."); return; } setError(""); setView("payment"); }}
+                  onClick={() => {
+                    if (!shippingValid) {
+                      setError(
+                        form.phone.length && form.phone.length !== 8
+                          ? "El teléfono debe tener 8 dígitos."
+                          : "Completa los campos marcados con *."
+                      );
+                      return;
+                    }
+                    setError(""); setView("payment");
+                  }}
                   className="flex-1 bg-brand-primary hover:bg-brand-primary-dark text-white font-black py-4 rounded-2xl transition"
                 >
                   Elegir pago →

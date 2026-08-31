@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import { PRODUCTS } from "../data/products";
 
 const clamp = (id, qty) => {
@@ -12,12 +12,32 @@ const omit = (obj, key) =>
 
 export function useCart() {
   const [cart, setCart] = useState({}); // { productId: qty }
+  // `lastAdded` drives the "added" feedback: the toast and the header
+  // badge bounce. It carries a bumping `key` so adding the SAME product
+  // twice still re-fires the animation.
+  const [lastAdded, setLastAdded] = useState(null);
+  const seq = useRef(0);
 
-  const addToCart = (id) =>
+  const addToCart = useCallback((id) => {
+    const product = PRODUCTS.find((p) => p.id === id);
+    if (!product) return;
+
     setCart((c) => {
-      const qty = clamp(id, (c[id] || 0) + 1);
-      return qty === (c[id] || 0) ? c : { ...c, [id]: qty };
+      const cur = c[id] || 0;
+      const qty = clamp(id, cur + 1);
+      return qty === cur ? c : { ...c, [id]: qty };
     });
+
+    // Solo avisamos si de verdad entró algo: al tope de stock el clic no
+    // suma nada y un toast ahí sería mentira. Se decide contra el estado
+    // ya renderizado, que es justo lo que el cliente tenía al frente.
+    const cur = cart[id] || 0;
+    if (clamp(id, cur + 1) !== cur) {
+      setLastAdded({ id, name: product.name, key: ++seq.current });
+    }
+  }, [cart]);
+
+  const clearLastAdded = useCallback(() => setLastAdded(null), []);
 
   const changeQty = (id, delta) =>
     setCart((c) => {
@@ -29,5 +49,5 @@ export function useCart() {
 
   const count = Object.values(cart).reduce((s, q) => s + q, 0);
 
-  return { cart, addToCart, changeQty, removeItem, count };
+  return { cart, addToCart, changeQty, removeItem, count, lastAdded, clearLastAdded };
 }

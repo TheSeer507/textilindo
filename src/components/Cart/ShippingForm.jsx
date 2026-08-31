@@ -1,8 +1,11 @@
 import { PROVINCES } from "../../data/provinces";
+import { formatPanamaPhone } from "../../utils/phone";
 
-const inputCls = "w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-primary";
+// text-base (16px) is deliberate: iOS Safari zooms the viewport when a
+// focused input is smaller than 16px, which looks like the layout breaking.
+const inputCls = "w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-brand-primary";
 
-export function ShippingForm({ form, set, error }) {
+export function ShippingForm({ form, set, setPhone, error }) {
   return (
     <div className="space-y-4">
       <div>
@@ -12,8 +15,16 @@ export function ShippingForm({ form, set, error }) {
       <div>
         <label className="block text-sm font-semibold mb-1">Teléfono (WhatsApp) *</label>
         <div className="flex">
-          <span className="inline-flex items-center px-3 border border-r-0 border-slate-300 rounded-l-xl bg-slate-50 text-sm font-semibold">+507</span>
-          <input className={inputCls + " rounded-l-none"} value={form.phone} onChange={set("phone")} placeholder="6123-4567" inputMode="numeric" autoComplete="tel" />
+          <span className="inline-flex items-center px-3 border border-r-0 border-slate-300 rounded-l-xl bg-slate-50 text-base font-semibold shrink-0">+507</span>
+          <input
+            className={inputCls + " rounded-l-none"}
+            value={formatPanamaPhone(form.phone)}
+            onChange={setPhone}
+            placeholder="6123-4567"
+            inputMode="numeric"
+            autoComplete="tel-national"
+            maxLength={9}
+          />
         </div>
       </div>
       <div>

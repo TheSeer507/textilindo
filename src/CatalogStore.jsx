@@ -15,10 +15,11 @@ import { Footer } from "./components/Footer/Footer";
 import { AdminDashboard } from "./components/AdminDashboard/AdminDashboard";
 import { AboutPage } from "./components/AboutPage/AboutPage";
 import { WhatsAppButton } from "./components/WhatsAppButton/WhatsAppButton";
+import { AddedToast } from "./components/AddedToast/AddedToast";
 
 export default function CatalogStore() {
   const route = useHashRoute();
-  const { cart, addToCart, changeQty, removeItem, count } = useCart();
+  const { cart, addToCart, changeQty, removeItem, count, lastAdded, clearLastAdded } = useCart();
   const [category, setCategory] = useState("Todos");
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -37,7 +38,7 @@ export default function CatalogStore() {
 
   return (
     <div className="min-h-screen bg-brand-surface text-slate-900" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
-      <Header count={count} onOpenCart={() => setCartOpen(true)} />
+      <Header count={count} onOpenCart={() => setCartOpen(true)} bumpKey={lastAdded?.key} />
 
       {isAbout ? (
         <AboutPage />
@@ -80,6 +81,12 @@ export default function CatalogStore() {
       <Footer />
 
       <WhatsAppButton hidden={cartOpen} productName={routedProduct?.name} />
+
+      <AddedToast
+        lastAdded={cartOpen ? null : lastAdded}
+        onOpenCart={() => { setCartOpen(true); clearLastAdded(); }}
+        onDismiss={clearLastAdded}
+      />
 
       <CartDrawer
         open={cartOpen}

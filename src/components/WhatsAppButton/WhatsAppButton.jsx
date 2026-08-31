@@ -29,7 +29,9 @@ export function WhatsAppButton({ hidden = false, productName }) {
       rel="noreferrer"
       aria-label="Escríbenos por WhatsApp"
       className={`
-        fixed bottom-5 right-5 z-30 flex items-center gap-3
+        fixed z-30 flex items-center gap-3
+        bottom-[calc(1.25rem+env(safe-area-inset-bottom))]
+        right-[calc(1.25rem+env(safe-area-inset-right))]
         rounded-full bg-[#25D366] text-white shadow-lg shadow-black/25
         hover:bg-[#1ebe5a] hover:scale-105 active:scale-95
         focus:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40

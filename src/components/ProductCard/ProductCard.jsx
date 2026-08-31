@@ -31,12 +31,12 @@ export function ProductCard({ product, inCartQty, onAdd }) {
         ) : null}
         <span className="absolute top-3 right-3 bg-white text-orange-600 text-xs font-bold px-2 py-1 rounded-full shadow">-{off}%</span>
       </a>
-      <div className="p-5 flex flex-col flex-1">
+      <div className="p-3 sm:p-5 flex flex-col flex-1">
         <p className="text-xs font-semibold text-brand-primary uppercase tracking-wide">{product.category}</p>
         <a href={"#product/" + product.id} className="text-left font-display font-semibold text-slate-900 mt-1 leading-snug hover:text-brand-primary">
           {product.name}
         </a>
-        <div className="mt-2 flex items-baseline gap-2">
+        <div className="mt-2 mb-3 flex items-baseline gap-2 flex-wrap">
           <span className="font-black text-xl text-slate-900">{money(product.price)}</span>
           <span className="line-through text-sm text-slate-400">{money(product.compareAt)}</span>
         </div>
@@ -47,7 +47,7 @@ export function ProductCard({ product, inCartQty, onAdd }) {
           onClick={() => onAdd(product.id)}
           disabled={outOfStock || atStockLimit}
           className={
-            "mt-auto pt-3 w-full font-bold text-sm py-2 rounded-xl transition " +
+            "mt-auto w-full font-bold text-xs sm:text-sm py-2.5 rounded-xl transition leading-tight " +
             (outOfStock || atStockLimit
               ? "bg-slate-100 text-slate-400 cursor-not-allowed"
               : inCartQty
@@ -60,8 +60,8 @@ export function ProductCard({ product, inCartQty, onAdd }) {
             : atStockLimit
             ? `Máximo disponible (${product.stock})`
             : inCartQty
-            ? `✓ En el carrito (${inCartQty}) — agregar otro`
-            : "Agregar al carrito"}
+            ? `✓ En carrito (${inCartQty}) · +1`
+            : "Agregar"}
         </button>
       </div>
     </div>

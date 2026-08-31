@@ -1,5 +1,6 @@
 import { CONFIG, money } from "../config/store";
 import { PAYMENT_METHODS } from "../data/paymentMethods";
+import { displayPanamaPhone } from "./phone";
 
 /* ==============================================================
    WHATSAPP LINKS
@@ -54,7 +55,7 @@ export function buildWhatsAppLink(cartItems, form, payMethod, totals) {
     `💰 *TOTAL:* ${money(totals.total)}`,
     "",
     `👤 *Cliente:* ${form.name.trim()}`,
-    `📱 *Teléfono:* +507 ${form.phone.trim()}`,
+    `📱 *Teléfono:* ${displayPanamaPhone(form.phone)}`,
     `📍 *Provincia:* ${form.province}`,
     `🏘️ *Ciudad/Sector:* ${form.city.trim()}`,
   ];
