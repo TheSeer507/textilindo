@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { CONFIG, money } from "../../config/store";
 import { PRODUCTS } from "../../data/products";
+import { UsersTable } from "./UsersTable";
 
 /* ==============================================================
    ADMIN — margins for the whole catalog (#admin)
+
+   Ya no es una ruta abierta: CatalogStore solo monta este panel
+   cuando hay sesión con rol employee o admin. Aun así, el muro
+   de verdad son las políticas RLS — esconder la ruta no protege
+   los datos, las políticas sí.
 ============================================================== */
-export function AdminDashboard() {
+export function AdminDashboard({ profile, isAdmin, onSignOut }) {
   const [fixed, setFixed] = useState(300);
 
   const rows = PRODUCTS.map((p) => {
@@ -28,8 +34,17 @@ export function AdminDashboard() {
           <div>
             <p className="text-amber-400 text-xs uppercase" style={{ letterSpacing: "0.3em" }}>{CONFIG.storeName} · Operaciones</p>
             <h1 className="font-black text-3xl mt-1">Rentabilidad del catálogo</h1>
+            <p className="text-xs text-slate-500 mt-2">
+              {profile?.full_name || profile?.email} ·{" "}
+              <span className="text-amber-400">{isAdmin ? "Administrador" : "Empleado"}</span>
+            </p>
           </div>
-          <a href="#" className="text-sm border border-slate-600 rounded-xl px-4 py-2 hover:bg-slate-800">← Volver a la tienda</a>
+          <div className="flex items-center gap-2">
+            <a href="#" className="text-sm border border-slate-600 rounded-xl px-4 py-2 hover:bg-slate-800">← Volver a la tienda</a>
+            <button onClick={onSignOut} className="text-sm border border-slate-600 rounded-xl px-4 py-2 hover:bg-slate-800">
+              Salir
+            </button>
+          </div>
         </div>
 
         <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-700">
@@ -74,8 +89,10 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        <p className="mt-8 text-xs text-slate-500">
-          Los costos por producto se editan en el arreglo PRODUCTS del código (cost, weightKg, shipPerKg, tariffPct). ⚠️ Panel del lado del cliente — no pongas datos confidenciales.
+        <UsersTable isAdmin={isAdmin} currentUserId={profile?.id} />
+
+        <p className="mt-10 text-xs text-slate-500">
+          Los costos por producto se editan en el arreglo PRODUCTS del código (cost, weightKg, shipPerKg, tariffPct).
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { PRODUCTS } from "./data/products";
 import { useCart } from "./hooks/useCart";
+import { useAuth } from "./hooks/useAuth";
 import { useHashRoute } from "./hooks/useHashRoute";
 import { Header } from "./components/Header/Header";
 import { Hero } from "./components/Hero/Hero";
@@ -16,9 +17,12 @@ import { AdminDashboard } from "./components/AdminDashboard/AdminDashboard";
 import { AboutPage } from "./components/AboutPage/AboutPage";
 import { WhatsAppButton } from "./components/WhatsAppButton/WhatsAppButton";
 import { AddedToast } from "./components/AddedToast/AddedToast";
+import { AuthPage } from "./components/Auth/AuthPage";
+import { AccountPage } from "./components/Auth/AccountPage";
 
 export default function CatalogStore() {
   const route = useHashRoute();
+  const auth = useAuth();
   const { cart, addToCart, changeQty, removeItem, count, lastAdded, clearLastAdded } = useCart();
   const [category, setCategory] = useState("Todos");
   const [cartOpen, setCartOpen] = useState(false);
@@ -29,18 +33,46 @@ export default function CatalogStore() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  if (route === "#admin") return <AdminDashboard />;
+  /* ---- RUTA PROTEGIDA: #admin ----
+     Se espera a que termine de restaurarse la sesión antes de decidir;
+     si no, al recargar el panel parpadearía "sin acceso" un instante. */
+  if (route === "#admin") {
+    if (auth.loading) return <FullScreenNote>Verificando acceso…</FullScreenNote>;
+    if (!auth.user) return <AuthPage auth={auth} />;
+    if (!auth.isStaff) {
+      return (
+        <FullScreenNote>
+          Esta sección es solo para el personal de {"Textilindo"}.
+          <a href="#" className="block mt-4 text-amber-400 underline text-sm">Volver a la tienda</a>
+        </FullScreenNote>
+      );
+    }
+    return (
+      <AdminDashboard
+        profile={auth.profile}
+        isAdmin={auth.isAdmin}
+        onSignOut={async () => { await auth.signOut(); window.location.hash = ""; }}
+      />
+    );
+  }
 
   const visible = category === "Todos" ? PRODUCTS : PRODUCTS.filter((p) => p.category === category);
   const isAbout = route === "#about";
+  const isLogin = route === "#login";
+  const isAccount = route === "#cuenta";
   const productMatch = route.match(/^#product\/(.+)$/);
   const routedProduct = productMatch ? PRODUCTS.find((p) => p.id === productMatch[1]) : null;
 
   return (
     <div className="min-h-screen bg-brand-surface text-slate-900" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
-      <Header count={count} onOpenCart={() => setCartOpen(true)} bumpKey={lastAdded?.key} />
+      <Header count={count} onOpenCart={() => setCartOpen(true)} bumpKey={lastAdded?.key} auth={auth} />
 
-      {isAbout ? (
+      {isLogin ? (
+        // Si ya hay sesión, #login no tiene sentido: mostramos la cuenta.
+        auth.user ? <AccountPage auth={auth} /> : <AuthPage auth={auth} />
+      ) : isAccount ? (
+        auth.user ? <AccountPage auth={auth} /> : <AuthPage auth={auth} />
+      ) : isAbout ? (
         <AboutPage />
       ) : productMatch ? (
         routedProduct ? (
@@ -104,6 +136,17 @@ export default function CatalogStore() {
         changeQty={changeQty}
         removeItem={removeItem}
       />
+    </div>
+  );
+}
+
+/* Pantalla neutra para los estados del panel (cargando / sin permiso).
+   Usa el mismo fondo oscuro del panel para que no haya un salto de
+   color cuando sí se concede el acceso. */
+function FullScreenNote({ children }) {
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-300 font-mono flex items-center justify-center px-6">
+      <div className="text-center max-w-sm">{children}</div>
     </div>
   );
 }
