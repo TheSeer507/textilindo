@@ -19,7 +19,25 @@ export function AccountPage({ auth }) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 md:py-16">
-      <h1 className="font-display font-semibold text-3xl tracking-tight">Mi cuenta</h1>
+      <div className="flex items-center gap-4">
+        {profile?.avatar_url && (
+          <img
+            src={profile.avatar_url}
+            alt=""
+            referrerPolicy="no-referrer"
+            className="w-14 h-14 rounded-full object-cover shrink-0"
+          />
+        )}
+        <h1 className="font-display font-semibold text-3xl tracking-tight">Mi cuenta</h1>
+      </div>
+
+      {/* Google no entrega teléfono, y el pedido se cierra por WhatsApp. */}
+      {!profile?.phone && (
+        <p className="mt-5 text-sm text-orange-800 bg-orange-50 border border-orange-200 rounded-2xl px-5 py-4">
+          Aún no tenemos tu teléfono. Te lo pediremos al hacer tu primer pedido
+          para coordinarlo por WhatsApp.
+        </p>
+      )}
 
       {isStaff && (
         <div className="mt-6 flex items-center justify-between gap-4 bg-slate-900 text-white rounded-2xl px-5 py-4">

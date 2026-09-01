@@ -79,6 +79,24 @@ export function useAuth() {
     return error ? { ok: false, error: error.message } : { ok: true };
   }, []);
 
+  /* Google no distingue entre registrarse y entrar: si la cuenta no
+     existe, se crea sola. Por eso el mismo botón sirve en los dos modos.
+
+     Al volver, Supabase trae el código en `?code=` (flujo PKCE), lo
+     canjea por la sesión y limpia la URL — por eso el cliente se crea
+     con detectSessionInUrl: true. No choca con el enrutado por hash. */
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+        queryParams: { prompt: "select_account" }, // permite cambiar de cuenta
+      },
+    });
+    // Si sale bien, el navegador ya se fue a Google; esto solo corre al fallar.
+    return error ? { ok: false, error: error.message } : { ok: true };
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
@@ -92,6 +110,7 @@ export function useAuth() {
     isAdmin: activeProfile?.role === "admin",
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
   };
 }

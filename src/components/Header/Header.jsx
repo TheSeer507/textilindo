@@ -36,9 +36,18 @@ export function Header({ count, onOpenCart, bumpKey, auth }) {
           {auth?.user ? (
             <a
               href="#cuenta"
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-brand-primary border border-slate-200 rounded-full px-3 py-2 transition-colors max-w-[9rem]"
+              className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-brand-primary border border-slate-200 rounded-full pl-1.5 pr-3 py-1.5 transition-colors max-w-[9rem]"
             >
-              <UserRound size={16} strokeWidth={2} className="shrink-0" />
+              {auth.profile?.avatar_url ? (
+                <img
+                  src={auth.profile.avatar_url}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  className="w-6 h-6 rounded-full shrink-0 object-cover"
+                />
+              ) : (
+                <UserRound size={16} strokeWidth={2} className="shrink-0 ml-1" />
+              )}
               <span className="truncate">{firstName || "Mi cuenta"}</span>
             </a>
           ) : (

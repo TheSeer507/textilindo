@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Mail, Lock, User, Phone, Building2, CheckCircle2 } from "lucide-react";
 import { normalizePanamaPhone, formatPanamaPhone } from "../../utils/phone";
+import { GoogleGlyph } from "../icons/GoogleGlyph";
 
 const inputCls =
   "w-full border border-slate-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-brand-primary";
@@ -91,7 +92,30 @@ export function AuthPage({ auth }) {
           : "Entra para ver tus pedidos y direcciones guardadas."}
       </p>
 
-      <form onSubmit={submit} className="mt-7 space-y-4">
+      {/* Google va primero: es un clic contra cinco campos. */}
+      <button
+        type="button"
+        onClick={async () => {
+          setError("");
+          setBusy(true);
+          const r = await auth.signInWithGoogle();
+          if (!r.ok) { setBusy(false); setError(translate(r.error)); }
+          // Si sale bien, el navegador ya navegó a Google.
+        }}
+        disabled={busy}
+        className="mt-7 w-full flex items-center justify-center gap-3 border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-60 font-bold text-slate-700 py-3.5 rounded-2xl transition-colors"
+      >
+        <GoogleGlyph />
+        Continuar con Google
+      </button>
+
+      <div className="flex items-center gap-3 my-6">
+        <span className="h-px flex-1 bg-slate-200" />
+        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">o</span>
+        <span className="h-px flex-1 bg-slate-200" />
+      </div>
+
+      <form onSubmit={submit} className="space-y-4">
         {isSignup && (
           <>
             <Field icon={User} label="Nombre completo *">
@@ -182,5 +206,8 @@ function translate(msg = "") {
   if (m.includes("password")) return "La contraseña debe tener al menos 8 caracteres.";
   if (m.includes("rate limit") || m.includes("too many"))
     return "Demasiados intentos seguidos. Espera un momento y vuelve a probar.";
+  // Aparece si el proveedor de Google no está habilitado en Supabase.
+  if (m.includes("provider is not enabled") || m.includes("unsupported provider"))
+    return "El acceso con Google aún no está habilitado. Usa tu correo y contraseña por ahora.";
   return msg;
 }
