@@ -52,6 +52,7 @@ export function buildWhatsAppLink(cartItems, form, payMethod, totals) {
     "",
     `📦 *Subtotal:* ${money(totals.subtotal)}`,
     `🚚 *Envío:* ${totals.shipping === 0 ? "GRATIS 🎉" : money(totals.shipping)}`,
+    `🧾 *ITBMS (${Math.round(CONFIG.itbmsRate * 100)}%):* ${money(totals.tax)}`,
     `💰 *TOTAL:* ${money(totals.total)}`,
     "",
     `👤 *Cliente:* ${form.name.trim()}`,

@@ -1,5 +1,6 @@
-import { UserRound, Mail, Phone, Building2, LayoutDashboard, LogOut } from "lucide-react";
+import { UserRound, Mail, Phone, Building2, LayoutDashboard, LogOut, MapPin } from "lucide-react";
 import { formatPanamaPhone } from "../../utils/phone";
+import { useDefaultAddress } from "../../hooks/useDefaultAddress";
 
 /* ==============================================================
    MI CUENTA (#cuenta)
@@ -9,6 +10,7 @@ import { formatPanamaPhone } from "../../utils/phone";
 ============================================================== */
 export function AccountPage({ auth }) {
   const { profile, user, isStaff, isAdmin, signOut } = auth;
+  const { address } = useDefaultAddress(user?.id ?? null);
 
   const rows = [
     { icon: UserRound, label: "Nombre", value: profile?.full_name },
@@ -70,8 +72,29 @@ export function AccountPage({ auth }) {
         ))}
       </div>
 
+      <h2 className="font-display font-semibold text-xl tracking-tight mt-10">
+        Dirección de entrega
+      </h2>
+      <div className="mt-3 bg-white rounded-3xl shadow-sm px-6 py-5">
+        {address ? (
+          <div className="flex gap-4">
+            <MapPin size={18} strokeWidth={2} className="text-slate-400 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-semibold text-slate-900">{address.city}</p>
+              <p className="text-slate-500">{address.province}</p>
+              {address.notes && <p className="text-slate-500 mt-1">{address.notes}</p>}
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500">
+            Todavía no has guardado una dirección. Se guarda sola cuando hagas
+            tu primer pedido, y de ahí en adelante el checkout se autocompleta.
+          </p>
+        )}
+      </div>
+
       <p className="text-sm text-slate-500 mt-6">
-        Tu historial de pedidos y direcciones guardadas aparecerán aquí próximamente.
+        Tu historial de pedidos aparecerá aquí próximamente.
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">

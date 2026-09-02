@@ -16,14 +16,13 @@ import { Footer } from "./components/Footer/Footer";
 import { AdminDashboard } from "./components/AdminDashboard/AdminDashboard";
 import { AboutPage } from "./components/AboutPage/AboutPage";
 import { WhatsAppButton } from "./components/WhatsAppButton/WhatsAppButton";
-import { AddedToast } from "./components/AddedToast/AddedToast";
 import { AuthPage } from "./components/Auth/AuthPage";
 import { AccountPage } from "./components/Auth/AccountPage";
 
 export default function CatalogStore() {
   const route = useHashRoute();
   const auth = useAuth();
-  const { cart, addToCart, changeQty, removeItem, count, lastAdded, clearLastAdded } = useCart();
+  const { cart, addToCart, changeQty, removeItem, count, lastAdded } = useCart();
   const [category, setCategory] = useState("Todos");
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -122,11 +121,6 @@ export default function CatalogStore() {
 
       <WhatsAppButton hidden={cartOpen} productName={routedProduct?.name} />
 
-      <AddedToast
-        lastAdded={cartOpen ? null : lastAdded}
-        onOpenCart={() => { setCartOpen(true); clearLastAdded(); }}
-        onDismiss={clearLastAdded}
-      />
 
       <CartDrawer
         open={cartOpen}
@@ -135,6 +129,7 @@ export default function CatalogStore() {
         products={PRODUCTS}
         changeQty={changeQty}
         removeItem={removeItem}
+        auth={auth}
       />
     </div>
   );

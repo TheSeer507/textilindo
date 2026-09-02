@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
-import { CONFIG, money } from "../../config/store";
+import { CONFIG, money, calcTotals } from "../../config/store";
 import { PAYMENT_METHODS } from "../../data/paymentMethods";
 import { buildWhatsAppLink } from "../../utils/whatsapp";
 import { normalizePanamaPhone } from "../../utils/phone";
+import { supabase } from "../../lib/supabaseClient";
+import { useDefaultAddress } from "../../hooks/useDefaultAddress";
 import { CartItemsView } from "./CartItemsView";
 import { ShippingForm } from "./ShippingForm";
 import { PaymentMethods } from "./PaymentMethods";
@@ -10,7 +12,7 @@ import { OrderConfirmation } from "./OrderConfirmation";
 
 const emptyForm = { name: "", phone: "", province: "", city: "", notes: "" };
 
-export function CartDrawer({ open, onClose, cart, products, changeQty, removeItem }) {
+export function CartDrawer({ open, onClose, cart, products, changeQty, removeItem, auth }) {
   // view: "cart" → "shipping" → "payment" → "done"
   const [view, setView] = useState("cart");
   const [form, setForm] = useState(emptyForm);
@@ -18,6 +20,11 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
   const [error, setError] = useState("");
   const [waLink, setWaLink] = useState(null);
   const [processing, setProcessing] = useState(false);
+  const [saveData, setSaveData] = useState(true);
+
+  const profile = auth?.profile;
+  const userId = auth?.user?.id ?? null;
+  const { address, ready: addressReady, saveDefault } = useDefaultAddress(userId);
 
   // Reset the wizard back to "cart" whenever the drawer transitions to open —
   // done during render (React's documented pattern for "adjust state when a
@@ -28,6 +35,25 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
     if (open) { setView("cart"); setError(""); }
   }
 
+  /* ---- AUTOCOMPLETADO ----
+     Se rellena una sola vez, cuando ya cargaron perfil y dirección, y
+     solo sobre campos vacíos: si se repitiera en cada render pisaría lo
+     que el cliente esté escribiendo. `filledFor` recuerda a quién se le
+     llenó, para volver a hacerlo si cambia de sesión. */
+  const [filledFor, setFilledFor] = useState(null);
+  if (userId && addressReady && profile && filledFor !== userId) {
+    setFilledFor(userId);
+    setForm((f) => ({
+      ...f,
+      name: f.name || profile.full_name || "",
+      phone: f.phone || profile.phone || "",
+      province: f.province || address?.province || "",
+      city: f.city || address?.city || "",
+      notes: f.notes || address?.notes || "",
+    }));
+  }
+  if (!userId && filledFor) setFilledFor(null); // cerró sesión
+
   const items = useMemo(
     () => Object.entries(cart)
       .map(([id, qty]) => ({ product: products.find((p) => p.id === id), qty }))
@@ -35,11 +61,7 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
     [cart, products]
   );
 
-  const totals = useMemo(() => {
-    const subtotal = items.reduce((s, i) => s + i.product.price * i.qty, 0);
-    const shipping = subtotal === 0 || subtotal >= CONFIG.freeShippingOver ? 0 : CONFIG.shippingFlat;
-    return { subtotal, shipping, total: subtotal + shipping };
-  }, [items]);
+  const totals = useMemo(() => calcTotals(items), [items]);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   // El teléfono se guarda siempre como 8 dígitos limpios, sin el 507.
@@ -72,6 +94,18 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
     if (tab) tab.location.href = link;
     else window.location.href = link; // popup blocked — go in this tab instead
     setView("done");
+
+    /* Guardar los datos va DESPUÉS de abrir WhatsApp y sin await: si la
+       base tarda o falla, el pedido igual sale. Es una comodidad para la
+       próxima compra, no un paso del que dependa esta. */
+    if (userId && saveData) {
+      saveDefault({ province: form.province, city: form.city, notes: form.notes });
+      // El teléfono de quien entró con Google llega vacío: se completa
+      // con el que acaba de escribir aquí.
+      if (!profile?.phone && form.phone) {
+        supabase.from("profiles").update({ phone: form.phone }).eq("id", userId);
+      }
+    }
   };
 
   const title =
@@ -96,7 +130,15 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
           {view === "cart" && (
             <CartItemsView items={items} totals={totals} changeQty={changeQty} removeItem={removeItem} />
           )}
-          {view === "shipping" && <ShippingForm form={form} set={set} setPhone={setPhone} error={error} />}
+          {view === "shipping" && (
+            <ShippingForm
+              form={form} set={set} setPhone={setPhone} error={error}
+              signedIn={!!userId}
+              prefilled={filledFor === userId && !!(address || profile?.phone)}
+              saveData={saveData}
+              setSaveData={setSaveData}
+            />
+          )}
           {view === "payment" && (
             <PaymentMethods payMethod={payMethod} setPayMethod={setPayMethod} setError={setError} error={error} />
           )}
@@ -111,6 +153,10 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
               <div className="flex justify-between text-slate-500">
                 <span>Envío</span>
                 <span className={totals.shipping === 0 ? "text-brand-primary font-bold" : ""}>{totals.shipping === 0 ? "GRATIS" : money(totals.shipping)}</span>
+              </div>
+              <div className="flex justify-between text-slate-500">
+                <span>ITBMS ({Math.round(CONFIG.itbmsRate * 100)}%)</span>
+                <span>{money(totals.tax)}</span>
               </div>
               <div className="flex justify-between font-black text-lg text-slate-900 pt-1"><span>Total</span><span>{money(totals.total)}</span></div>
             </div>

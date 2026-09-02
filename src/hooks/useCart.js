@@ -12,9 +12,9 @@ const omit = (obj, key) =>
 
 export function useCart() {
   const [cart, setCart] = useState({}); // { productId: qty }
-  // `lastAdded` drives the "added" feedback: the toast and the header
-  // badge bounce. It carries a bumping `key` so adding the SAME product
-  // twice still re-fires the animation.
+  // `lastAdded` alimenta el rebote del contador en el header. Lleva un
+  // `key` que sube en cada alta, para que agregar el MISMO producto dos
+  // veces vuelva a disparar la animación.
   const [lastAdded, setLastAdded] = useState(null);
   const seq = useRef(0);
 
@@ -37,8 +37,6 @@ export function useCart() {
     }
   }, [cart]);
 
-  const clearLastAdded = useCallback(() => setLastAdded(null), []);
-
   const changeQty = (id, delta) =>
     setCart((c) => {
       const qty = clamp(id, (c[id] || 0) + delta);
@@ -49,5 +47,5 @@ export function useCart() {
 
   const count = Object.values(cart).reduce((s, q) => s + q, 0);
 
-  return { cart, addToCart, changeQty, removeItem, count, lastAdded, clearLastAdded };
+  return { cart, addToCart, changeQty, removeItem, count, lastAdded };
 }
