@@ -1,5 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { PRODUCTS } from "../data/products";
+import { calcTotals } from "../config/store";
 
 const clamp = (id, qty) => {
   const product = PRODUCTS.find((p) => p.id === id);
@@ -47,5 +48,17 @@ export function useCart() {
 
   const count = Object.values(cart).reduce((s, q) => s + q, 0);
 
-  return { cart, addToCart, changeQty, removeItem, count, lastAdded };
+  /* Los renglones y los totales viven aquí, no en la gaveta: la barra
+     inferior y la gaveta muestran las mismas cifras, y con una sola
+     fuente no pueden discrepar. */
+  const items = useMemo(
+    () =>
+      Object.entries(cart)
+        .map(([id, qty]) => ({ product: PRODUCTS.find((p) => p.id === id), qty }))
+        .filter((i) => i.product),
+    [cart]
+  );
+  const totals = useMemo(() => calcTotals(items), [items]);
+
+  return { cart, addToCart, changeQty, removeItem, count, lastAdded, items, totals };
 }

@@ -33,6 +33,13 @@ html { -webkit-text-size-adjust: 100%; }
 }
 .animate-cart-bump { animation: cart-bump 0.45s ease-out; }
 
+/* La barra de checkout entra deslizándose desde abajo. */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.animate-slide-up { animation: slide-up 0.28s ease-out; }
+
 /* Respeta a quien pidió menos movimiento en el sistema operativo. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { CONFIG, money, calcTotals } from "../../config/store";
+import { useState } from "react";
+import { CONFIG, money } from "../../config/store";
 import { PAYMENT_METHODS } from "../../data/paymentMethods";
 import { buildWhatsAppLink } from "../../utils/whatsapp";
 import { normalizePanamaPhone } from "../../utils/phone";
@@ -12,7 +12,7 @@ import { OrderConfirmation } from "./OrderConfirmation";
 
 const emptyForm = { name: "", phone: "", province: "", city: "", notes: "" };
 
-export function CartDrawer({ open, onClose, cart, products, changeQty, removeItem, auth }) {
+export function CartDrawer({ open, onClose, items, totals, changeQty, removeItem, auth }) {
   // view: "cart" → "shipping" → "payment" → "done"
   const [view, setView] = useState("cart");
   const [form, setForm] = useState(emptyForm);
@@ -54,14 +54,8 @@ export function CartDrawer({ open, onClose, cart, products, changeQty, removeIte
   }
   if (!userId && filledFor) setFilledFor(null); // cerró sesión
 
-  const items = useMemo(
-    () => Object.entries(cart)
-      .map(([id, qty]) => ({ product: products.find((p) => p.id === id), qty }))
-      .filter((i) => i.product),
-    [cart, products]
-  );
-
-  const totals = useMemo(() => calcTotals(items), [items]);
+  /* `items` y `totals` llegan desde useCart: la barra inferior muestra
+     las mismas cifras y así no hay dos cálculos que puedan discrepar. */
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   // El teléfono se guarda siempre como 8 dígitos limpios, sin el 507.

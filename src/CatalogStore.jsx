@@ -16,13 +16,14 @@ import { Footer } from "./components/Footer/Footer";
 import { AdminDashboard } from "./components/AdminDashboard/AdminDashboard";
 import { AboutPage } from "./components/AboutPage/AboutPage";
 import { WhatsAppButton } from "./components/WhatsAppButton/WhatsAppButton";
+import { CheckoutBar } from "./components/CheckoutBar/CheckoutBar";
 import { AuthPage } from "./components/Auth/AuthPage";
 import { AccountPage } from "./components/Auth/AccountPage";
 
 export default function CatalogStore() {
   const route = useHashRoute();
   const auth = useAuth();
-  const { cart, addToCart, changeQty, removeItem, count, lastAdded } = useCart();
+  const { cart, addToCart, changeQty, removeItem, count, lastAdded, items, totals } = useCart();
   const [category, setCategory] = useState("Todos");
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -62,8 +63,18 @@ export default function CatalogStore() {
   const productMatch = route.match(/^#product\/(.+)$/);
   const routedProduct = productMatch ? PRODUCTS.find((p) => p.id === productMatch[1]) : null;
 
+  // La barra inferior se superpone al pie de página; este relleno evita
+  // que tape la última fila de productos. Solo en móvil, que es donde sale.
+  const barVisible = count > 0;
+
   return (
-    <div className="min-h-screen bg-brand-surface text-slate-900" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div
+      className={
+        "min-h-screen bg-brand-surface text-slate-900 " +
+        (barVisible ? "pb-24 sm:pb-0" : "")
+      }
+      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+    >
       <Header count={count} onOpenCart={() => setCartOpen(true)} bumpKey={lastAdded?.key} auth={auth} />
 
       {isLogin ? (
@@ -119,14 +130,24 @@ export default function CatalogStore() {
 
       <Footer />
 
-      <WhatsAppButton hidden={cartOpen} productName={routedProduct?.name} />
+      <WhatsAppButton
+        hidden={cartOpen}
+        productName={routedProduct?.name}
+        raised={barVisible}
+      />
 
+      <CheckoutBar
+        count={count}
+        subtotal={totals.subtotal}
+        onOpenCart={() => setCartOpen(true)}
+        hidden={cartOpen}
+      />
 
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}
-        cart={cart}
-        products={PRODUCTS}
+        items={items}
+        totals={totals}
         changeQty={changeQty}
         removeItem={removeItem}
         auth={auth}

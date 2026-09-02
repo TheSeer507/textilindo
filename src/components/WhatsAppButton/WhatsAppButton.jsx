@@ -11,7 +11,7 @@ import { WhatsAppGlyph } from "../icons/WhatsAppGlyph";
    It is a real <a>, not a button with window.open() — anchors are
    never caught by popup blockers, which matters on mobile Safari.
 ============================================================== */
-export function WhatsAppButton({ hidden = false, productName }) {
+export function WhatsAppButton({ hidden = false, productName, raised = false }) {
   const [expanded, setExpanded] = useState(false);
 
   // Show the text label after a beat so it catches the eye once the
@@ -30,8 +30,12 @@ export function WhatsAppButton({ hidden = false, productName }) {
       aria-label="Escríbenos por WhatsApp"
       className={`
         fixed z-30 flex items-center gap-3
-        bottom-[calc(1.25rem+env(safe-area-inset-bottom))]
         right-[calc(1.25rem+env(safe-area-inset-right))]
+        ${raised
+          // Sube por encima de la barra de checkout, que solo existe en
+          // móvil; en escritorio la barra no sale y vuelve a su sitio.
+          ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] sm:bottom-[calc(1.25rem+env(safe-area-inset-bottom))]"
+          : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))]"}
         rounded-full bg-[#25D366] text-white shadow-lg shadow-black/25
         hover:bg-[#1ebe5a] hover:scale-105 active:scale-95
         focus:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40
