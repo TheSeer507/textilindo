@@ -8,7 +8,7 @@ export function Footer() {
       <div className="max-w-6xl mx-auto px-4 py-14 grid sm:grid-cols-2 gap-10">
         <div>
           <div className="inline-block bg-white rounded-xl px-4 py-2">
-            <img src={logo} alt="Textilindo" className="h-8 w-auto" />
+            <img src={logo} alt="Textilindo" className="h-8 w-auto" loading="lazy" decoding="async" />
           </div>
           <p className="text-sm text-slate-400 mt-4 max-w-xs leading-relaxed">
             Tu tienda de telas, hilos y textiles de confianza en Panamá.

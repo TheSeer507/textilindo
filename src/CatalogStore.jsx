@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { PRODUCTS } from "./data/products";
 import { useCart } from "./hooks/useCart";
 import { useAuth } from "./hooks/useAuth";
@@ -13,12 +13,20 @@ import { WhyChooseUs } from "./components/WhyChooseUs/WhyChooseUs";
 import { FeatureBanner } from "./components/FeatureBanner/FeatureBanner";
 import { PerksBar } from "./components/PerksBar/PerksBar";
 import { Footer } from "./components/Footer/Footer";
-import { AdminDashboard } from "./components/AdminDashboard/AdminDashboard";
 import { AboutPage } from "./components/AboutPage/AboutPage";
 import { WhatsAppButton } from "./components/WhatsAppButton/WhatsAppButton";
 import { CheckoutBar } from "./components/CheckoutBar/CheckoutBar";
 import { AuthPage } from "./components/Auth/AuthPage";
 import { AccountPage } from "./components/Auth/AccountPage";
+
+/* El panel solo lo abre el personal, pero viajaba en el paquete que
+   descarga cada cliente. Cargándolo bajo demanda, sale del camino
+   crítico de quien solo viene a comprar. */
+const AdminDashboard = lazy(() =>
+  import("./components/AdminDashboard/AdminDashboard").then((m) => ({
+    default: m.AdminDashboard,
+  }))
+);
 
 export default function CatalogStore() {
   const route = useHashRoute();
@@ -48,11 +56,13 @@ export default function CatalogStore() {
       );
     }
     return (
-      <AdminDashboard
-        profile={auth.profile}
-        isAdmin={auth.isAdmin}
-        onSignOut={async () => { await auth.signOut(); window.location.hash = ""; }}
-      />
+      <Suspense fallback={<FullScreenNote>Cargando panel…</FullScreenNote>}>
+        <AdminDashboard
+          profile={auth.profile}
+          isAdmin={auth.isAdmin}
+          onSignOut={async () => { await auth.signOut(); window.location.hash = ""; }}
+        />
+      </Suspense>
     );
   }
 

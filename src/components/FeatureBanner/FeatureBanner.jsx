@@ -4,6 +4,8 @@ export function FeatureBanner() {
   return (
     <div className="relative h-64 md:h-80 overflow-hidden">
       <img
+        loading="lazy"
+        decoding="async"
         src={ribbons}
         alt="Pared de cintas y telas de colores en Textilindo"
         className="absolute inset-0 w-full h-full object-cover"

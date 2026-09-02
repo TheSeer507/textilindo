@@ -7,6 +7,8 @@ export function Hero() {
         src={storeAisle}
         alt="Pasillo de la tienda Textilindo con rollos de tela"
         className="absolute inset-0 w-full h-full object-cover"
+        fetchPriority="high"
+        decoding="async"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/35 to-slate-900/10" />
       <div className="relative h-full max-w-6xl mx-auto px-4 flex flex-col justify-end pb-12 md:pb-16">

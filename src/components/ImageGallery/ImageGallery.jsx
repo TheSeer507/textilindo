@@ -66,7 +66,7 @@ export function ImageGallery({ images, alt }) {
           onMouseMove={handleMouseMove}
           onClick={() => setLightboxOpen(true)}
         >
-          <img src={images[index]} alt={`${alt} — foto ${index + 1}`} className="w-full h-full object-cover" />
+          <img src={images[index]} alt={`${alt} — foto ${index + 1}`} className="w-full h-full object-cover" fetchPriority="high" decoding="async" />
 
           <span className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center text-slate-700 pointer-events-none">
             <ZoomIn size={18} strokeWidth={2} />
@@ -122,7 +122,7 @@ export function ImageGallery({ images, alt }) {
                 (i === index ? "border-brand-primary" : "border-transparent opacity-60 hover:opacity-100")
               }
             >
-              <img src={src} alt="" className="w-full h-full object-cover" />
+              <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
             </button>
           ))}
         </div>

@@ -37,6 +37,8 @@ export function WhyChooseUs() {
         {FEATURES.map((f) => (
           <div key={f.title}>
             <img
+              loading="lazy"
+              decoding="async"
               src={f.img}
               alt={f.alt}
               className="rounded-2xl w-full h-56 object-cover shadow-md"

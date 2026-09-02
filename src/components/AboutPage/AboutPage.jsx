@@ -6,7 +6,7 @@ export function AboutPage() {
   return (
     <div>
       <div className="relative h-64 md:h-96 overflow-hidden">
-        <img src={fachada} alt="Fachada de Textilindo" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={fachada} alt="Fachada de Textilindo" className="absolute inset-0 w-full h-full object-cover" fetchPriority="high" decoding="async" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/35 to-slate-900/10" />
         <div className="relative h-full max-w-6xl mx-auto px-4 flex flex-col items-start justify-end pb-8">
           <h1 className="font-display font-semibold italic text-4xl md:text-6xl text-white tracking-tight">Acerca de Nosotros</h1>
@@ -31,6 +31,8 @@ export function AboutPage() {
             </p>
           </div>
           <img
+            loading="lazy"
+            decoding="async"
             src={mercancia1}
             alt="Interior de la tienda Textilindo con rollos de tela"
             className="rounded-2xl w-full h-72 md:h-96 object-cover shadow-lg"
@@ -39,6 +41,8 @@ export function AboutPage() {
 
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           <img
+            loading="lazy"
+            decoding="async"
             src={mercancia2}
             alt="Mercancía y accesorios disponibles en Textilindo"
             className="rounded-2xl w-full h-72 md:h-96 object-cover shadow-lg"
