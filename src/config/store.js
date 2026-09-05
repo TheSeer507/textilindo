@@ -17,6 +17,36 @@ export const CONFIG = {
   itbmsOnShipping: false,
 };
 
+/* ==============================================================
+   ⬇⬇  CONTACTO — EDITAR AQUÍ  ⬇⬇
+   Esto es lo que sale en "Contáctanos" en el pie de página.
+
+   Cualquier campo que quede en "" simplemente NO se muestra: el pie
+   se acomoda solo. Así se puede ir llenando a medida que el dueño
+   confirme los datos, sin que quede un correo falso publicado ni un
+   enlace roto mientras tanto.
+============================================================== */
+export const CONTACT = {
+  supportEmail: "",   // ej. "soporte@textilindo.com"
+  salesEmail: "",     // ej. "ventas@textilindo.com"
+  address: "",        // ej. "Avenida Central, Local 24B, Ciudad de Panamá"
+  hours: "",          // ej. "Lunes a sábado, 9:00 a.m. – 6:00 p.m."
+};
+
+/* Redes sociales: pegar la URL COMPLETA del perfil, no el usuario.
+   Ej. "https://www.instagram.com/textilindo"
+   Lo que quede en "" no aparece. */
+export const SOCIAL = {
+  instagram: "",
+  facebook: "",
+  tiktok: "",
+  youtube: "",
+  x: "",
+};
+/* ==============================================================
+   ⬆⬆  FIN DE LO EDITABLE  ⬆⬆
+============================================================== */
+
 /* El envío gratis se mide contra el subtotal sin impuesto, para que el
    ITBMS no empuje artificialmente a un cliente sobre el umbral. */
 export const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
