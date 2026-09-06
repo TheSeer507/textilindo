@@ -41,10 +41,12 @@ export function buildChatLink({ productName, outOfStock } = {}) {
    confirms. The sales rep reads this, confirms stock, and closes
    payment and delivery in the same thread.
 -------------------------------------------------------------- */
-export function buildWhatsAppLink(cartItems, form, payMethod, totals) {
+export function buildWhatsAppLink(cartItems, form, payMethod, totals, orderNumber) {
   const payLabel = PAYMENT_METHODS.find((m) => m.id === payMethod)?.label || payMethod;
   const lines = [
-    `🛍️ *NUEVO PEDIDO — ${CONFIG.storeName}*`,
+    orderNumber
+      ? `🛍️ *PEDIDO #${orderNumber} — ${CONFIG.storeName}*`
+      : `🛍️ *NUEVO PEDIDO — ${CONFIG.storeName}*`,
     "━━━━━━━━━━━━━━━",
     ...cartItems.map(
       ({ product, qty }) => `▪️ ${qty}× ${product.name} — ${money(product.price * qty)}`

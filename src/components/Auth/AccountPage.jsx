@@ -1,6 +1,7 @@
 import { UserRound, Mail, Phone, Building2, LayoutDashboard, LogOut, MapPin } from "lucide-react";
 import { formatPanamaPhone } from "../../utils/phone";
 import { useDefaultAddress } from "../../hooks/useDefaultAddress";
+import { OrderHistory } from "./OrderHistory";
 
 /* ==============================================================
    MI CUENTA (#cuenta)
@@ -93,9 +94,7 @@ export function AccountPage({ auth }) {
         )}
       </div>
 
-      <p className="text-sm text-slate-500 mt-6">
-        Tu historial de pedidos aparecerá aquí próximamente.
-      </p>
+      <OrderHistory />
 
       <div className="mt-8 flex flex-wrap gap-3">
         <a

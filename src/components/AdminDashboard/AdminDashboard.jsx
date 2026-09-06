@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CONFIG, money } from "../../config/store";
 import { PRODUCTS } from "../../data/products";
+import { OrdersTable } from "./OrdersTable";
 import { UsersTable } from "./UsersTable";
 
 /* ==============================================================
@@ -88,6 +89,8 @@ export function AdminDashboard({ profile, isAdmin, onSignOut }) {
             <p className="text-xs text-slate-500 mt-1">vendiendo {best.emoji} {best.name}</p>
           </div>
         </div>
+
+        <OrdersTable />
 
         <UsersTable isAdmin={isAdmin} currentUserId={profile?.id} />
 

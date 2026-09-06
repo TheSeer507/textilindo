@@ -4,6 +4,7 @@ import { PAYMENT_METHODS } from "../../data/paymentMethods";
 import { buildWhatsAppLink } from "../../utils/whatsapp";
 import { normalizePanamaPhone } from "../../utils/phone";
 import { supabase } from "../../lib/supabaseClient";
+import { saveOrder } from "../../utils/orders";
 import { useDefaultAddress } from "../../hooks/useDefaultAddress";
 import { CartItemsView } from "./CartItemsView";
 import { ShippingForm } from "./ShippingForm";
@@ -21,6 +22,7 @@ export function CartDrawer({ open, onClose, items, totals, changeQty, removeItem
   const [waLink, setWaLink] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [saveData, setSaveData] = useState(true);
+  const [orderNumber, setOrderNumber] = useState(null);
 
   const profile = auth?.profile;
   const userId = auth?.user?.id ?? null;
@@ -74,17 +76,26 @@ export function CartDrawer({ open, onClose, items, totals, changeQty, removeItem
 
     setProcessing(true);
     const result = await method.process({ items, form, totals });
-    setProcessing(false);
     if (!result.ok) {
+      setProcessing(false);
       tab?.close();
       setError(result.error || "No se pudo procesar el pago.");
       return;
     }
 
+    /* El pedido se guarda ANTES de armar el mensaje, para poder citar el
+       número (#124) en WhatsApp: el vendedor y el cliente necesitan una
+       referencia común. saveOrder nunca tira error y se rinde a los 4 s,
+       así que una base lenta retrasa el mensaje pero no impide la venta;
+       en ese caso sale sin número. */
+    const saved = await saveOrder({ items, form, payMethod, totals, userId });
+    setProcessing(false);
+
     // Today every enabled method confirms via WhatsApp.
     // An online gateway would instead redirect: tab.location.href = result.paymentUrl
-    const link = buildWhatsAppLink(items, form, payMethod, totals);
+    const link = buildWhatsAppLink(items, form, payMethod, totals, saved.orderNumber);
     setWaLink(link);
+    setOrderNumber(saved.orderNumber ?? null);
     if (tab) tab.location.href = link;
     else window.location.href = link; // popup blocked — go in this tab instead
     setView("done");
@@ -136,7 +147,7 @@ export function CartDrawer({ open, onClose, items, totals, changeQty, removeItem
           {view === "payment" && (
             <PaymentMethods payMethod={payMethod} setPayMethod={setPayMethod} setError={setError} error={error} />
           )}
-          {view === "done" && <OrderConfirmation waLink={waLink} />}
+          {view === "done" && <OrderConfirmation waLink={waLink} orderNumber={orderNumber} />}
         </div>
 
         {/* ---- FOOTER: totals + primary action ---- */}
