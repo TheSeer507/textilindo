@@ -30,7 +30,7 @@ export const CONTACT = {
   supportEmail: "textilindo@gmail.com",   // ej. "soporte@textilindo.com"
   salesEmail: "",     // ej. "ventas@textilindo.com"
   address: "Colon, Calle 9 Avenida Bolivar",        // ej. "Avenida Central, Local 24B, Ciudad de Panamá"
-  hours: "Lunes a Sábado, 9:00 a.m. - 6:00 p.m.",          // ej. "Lunes a sábado, 9:00 a.m. – 6:00 p.m."
+  hours: "Lunes a viernes de 8:30 am -5:30 pm\n  Sábados de 8:30 am -5:00 pm",          // ej. "Lunes a sábado, 9:00 a.m. – 6:00 p.m."
 };
 
 /* Redes sociales: pegar la URL COMPLETA del perfil, no el usuario.
@@ -38,7 +38,7 @@ export const CONTACT = {
    Lo que quede en "" no aparece. */
 export const SOCIAL = {
   instagram: "https://www.instagram.com/textilindocolon",
-  facebook: "",
+  facebook: "https://www.facebook.com/share/18rpg6aDL6/",
   tiktok: "https://www.tiktok.com/@textilindoavenidabolivar",
   youtube: "",
   x: "",
