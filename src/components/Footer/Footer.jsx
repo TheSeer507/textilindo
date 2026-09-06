@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Mail, MapPin, Clock } from "lucide-react";
 import logo from "../../assets/textilindologo.jpg";
 import { CONFIG, CONTACT, SOCIAL } from "../../config/store";
@@ -20,7 +21,7 @@ const NETWORKS = [
 export function Footer() {
   const networks = NETWORKS.filter((n) => SOCIAL[n.key]);
   const hasContact =
-    CONTACT.supportEmail || CONTACT.salesEmail || CONTACT.address || CONTACT.hours;
+    CONTACT.supportEmail || CONTACT.salesEmail || CONTACT.address || CONTACT.hours?.length;
 
   return (
     <footer className="bg-slate-900 text-slate-300">
@@ -77,9 +78,18 @@ export function Footer() {
                   <span className="text-slate-400">{CONTACT.address}</span>
                 </ContactRow>
               )}
-              {CONTACT.hours && (
+              {CONTACT.hours?.length > 0 && (
                 <ContactRow icon={Clock}>
-                  <span className="text-slate-400">{CONTACT.hours}</span>
+                  {/* Los días alineados en su propia columna: leído de un
+                      vistazo, "¿abren el sábado?" se responde solo. */}
+                  <span className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-slate-400">
+                    {CONTACT.hours.map(({ days, time }) => (
+                      <Fragment key={days}>
+                        <span className="text-slate-300 whitespace-nowrap">{days}</span>
+                        <span className="tabular-nums">{time}</span>
+                      </Fragment>
+                    ))}
+                  </span>
                 </ContactRow>
               )}
             </div>
@@ -106,7 +116,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-slate-800 py-5 text-center text-xs text-slate-500">
-        © {new Date().getFullYear()} {CONFIG.storeName} Panamá · Ciudad de Panamá
+        © {new Date().getFullYear()} {CONFIG.storeName} · Colón, Panamá
       </div>
     </footer>
   );

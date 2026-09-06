@@ -28,9 +28,16 @@ export const CONFIG = {
 ============================================================== */
 export const CONTACT = {
   supportEmail: "textilindo@gmail.com",   // ej. "soporte@textilindo.com"
-  salesEmail: "",     // ej. "ventas@textilindo.com"
-  address: "Colon, Calle 9 Avenida Bolivar",        // ej. "Avenida Central, Local 24B, Ciudad de Panamá"
-  hours: "Lunes a viernes de 8:30 am -5:30 pm\n  Sábados de 8:30 am -5:00 pm",          // ej. "Lunes a sábado, 9:00 a.m. – 6:00 p.m."
+  salesEmail: "",                         // ej. "ventas@textilindo.com"
+  address: "Colón, Calle 9 y Avenida Bolívar",
+
+  /* Horario: una línea por renglón. El pie los apila y los alinea, así
+     que aquí no hacen falta saltos de línea ni espacios de relleno. */
+  hours: [
+    { days: "Lunes a viernes", time: "8:30 a.m. – 5:30 p.m." },
+    { days: "Sábados",         time: "8:30 a.m. – 5:00 p.m." },
+    // { days: "Domingos", time: "Cerrado" },
+  ],
 };
 
 /* Redes sociales: pegar la URL COMPLETA del perfil, no el usuario.
