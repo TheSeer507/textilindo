@@ -65,6 +65,12 @@ export function CartDrawer({ open, onClose, items, totals, changeQty, removeItem
   const shippingValid =
     form.name.trim() && form.phone.length === 8 && form.province && form.city.trim();
 
+  /* El botón tiene que decir la verdad de lo que va a pasar: con tarjeta
+     lleva a la pasarela, no a WhatsApp. Prometer WhatsApp y abrir otra
+     cosa es la clase de sorpresa que hace abandonar un carrito. */
+  const selectedMethod = PAYMENT_METHODS.find((m) => m.id === payMethod);
+  const isRedirect = selectedMethod?.mode === "redirect";
+
   const confirmOrder = async () => {
     const method = PAYMENT_METHODS.find((m) => m.id === payMethod);
     if (!method) { setError("Elige un método de pago para confirmar."); return; }
@@ -208,9 +214,20 @@ export function CartDrawer({ open, onClose, items, totals, changeQty, removeItem
                 <button
                   onClick={confirmOrder}
                   disabled={processing}
-                  className="flex-1 bg-green-500 hover:bg-green-600 disabled:opacity-60 text-white font-black py-4 rounded-2xl transition"
+                  className={
+                    "flex-1 disabled:opacity-60 text-white font-black py-4 rounded-2xl transition " +
+                    (isRedirect
+                      ? "bg-brand-primary hover:bg-brand-primary-dark"
+                      : "bg-green-500 hover:bg-green-600")
+                  }
                 >
-                  {processing ? "Procesando…" : "Confirmar por WhatsApp ✓"}
+                  {processing
+                    ? "Procesando…"
+                    : !selectedMethod
+                    ? "Confirmar pedido"
+                    : isRedirect
+                    ? `Pagar ${money(totals.total)} →`
+                    : "Confirmar por WhatsApp ✓"}
                 </button>
               </div>
             )}
