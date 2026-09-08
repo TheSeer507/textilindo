@@ -16,6 +16,7 @@ import { Footer } from "./components/Footer/Footer";
 import { AboutPage } from "./components/AboutPage/AboutPage";
 import { WhatsAppButton } from "./components/WhatsAppButton/WhatsAppButton";
 import { CheckoutBar } from "./components/CheckoutBar/CheckoutBar";
+import { PaymentResult } from "./components/Cart/PaymentResult";
 import { AuthPage } from "./components/Auth/AuthPage";
 import { AccountPage } from "./components/Auth/AccountPage";
 
@@ -68,6 +69,7 @@ export default function CatalogStore() {
 
   const visible = category === "Todos" ? PRODUCTS : PRODUCTS.filter((p) => p.category === category);
   const isAbout = route === "#about";
+  const isPaymentResult = route.startsWith("#pago");
   const isLogin = route === "#login";
   const isAccount = route === "#cuenta";
   const productMatch = route.match(/^#product\/(.+)$/);
@@ -87,7 +89,9 @@ export default function CatalogStore() {
     >
       <Header count={count} onOpenCart={() => setCartOpen(true)} bumpKey={lastAdded?.key} auth={auth} />
 
-      {isLogin ? (
+      {isPaymentResult ? (
+        <PaymentResult signedIn={!!auth.user} />
+      ) : isLogin ? (
         // Si ya hay sesión, #login no tiene sentido: mostramos la cuenta.
         auth.user ? <AccountPage auth={auth} /> : <AuthPage auth={auth} />
       ) : isAccount ? (

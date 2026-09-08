@@ -75,29 +75,39 @@ export function CartDrawer({ open, onClose, items, totals, changeQty, removeItem
     const tab = window.open("", "_blank");
 
     setProcessing(true);
-    const result = await method.process({ items, form, totals });
+
+    /* El pedido se guarda PRIMERO, siempre:
+       - para WhatsApp, porque así el mensaje puede citar el #124 y
+         vendedor y cliente comparten una referencia;
+       - para la pasarela, porque el servidor relee el monto desde la
+         base a partir del id (si el monto viniera del navegador,
+         cualquiera podría pagar $0.01 por un pedido de $100).
+
+       saveOrder nunca lanza excepción y se rinde a los 4 s. */
+    const saved = await saveOrder({ items, form, payMethod, totals, userId });
+
+    const result = await method.process({ items, form, totals, orderId: saved.orderId });
+    setProcessing(false);
+
     if (!result.ok) {
-      setProcessing(false);
       tab?.close();
       setError(result.error || "No se pudo procesar el pago.");
       return;
     }
 
-    /* El pedido se guarda ANTES de armar el mensaje, para poder citar el
-       número (#124) en WhatsApp: el vendedor y el cliente necesitan una
-       referencia común. saveOrder nunca tira error y se rinde a los 4 s,
-       así que una base lenta retrasa el mensaje pero no impide la venta;
-       en ese caso sale sin número. */
-    const saved = await saveOrder({ items, form, payMethod, totals, userId });
-    setProcessing(false);
-
-    // Today every enabled method confirms via WhatsApp.
-    // An online gateway would instead redirect: tab.location.href = result.paymentUrl
-    const link = buildWhatsAppLink(items, form, payMethod, totals, saved.orderNumber);
-    setWaLink(link);
     setOrderNumber(saved.orderNumber ?? null);
-    if (tab) tab.location.href = link;
-    else window.location.href = link; // popup blocked — go in this tab instead
+
+    /* Dos desenlaces posibles. La pestaña ya está abierta desde el clic,
+       así que en ambos casos solo hay que apuntarla. */
+    const destination =
+      result.mode === "redirect"
+        ? result.url // pasarela: página segura de PagueloFacil
+        : buildWhatsAppLink(items, form, payMethod, totals, saved.orderNumber);
+
+    if (result.mode !== "redirect") setWaLink(destination);
+
+    if (tab) tab.location.href = destination;
+    else window.location.href = destination; // popup bloqueado: en esta pestaña
     setView("done");
 
     /* Guardar los datos va DESPUÉS de abrir WhatsApp y sin await: si la

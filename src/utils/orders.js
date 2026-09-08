@@ -55,7 +55,8 @@ export async function saveOrder({ items, form, payMethod, totals, userId }) {
 
         if (error) return { ok: false, error: error.message };
         const row = Array.isArray(data) ? data[0] : data;
-        return { ok: true, orderNumber: row?.order_number };
+        // El id hace falta para la pasarela; el número, para WhatsApp.
+        return { ok: true, orderId: row?.order_id, orderNumber: row?.order_number };
       })(),
       TIMEOUT_MS
     );
