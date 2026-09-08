@@ -78,6 +78,11 @@ Deno.serve(async (req) => {
       // PARM_1 vuelve tal cual en el callback: así sabemos qué pedido pagó.
       PARM_1: order.id,
       EXPIRES_IN: "1800", // 30 min; un enlace viejo no debe seguir cobrable
+      /* Qué medios de pago dibuja la página. Sin este parámetro el
+         checkout puede quedarse solo con el resumen y sin formulario.
+         PF_CARD_TYPE permite cambiarlo sin tocar código (CARD, CASH,
+         o "CARD,CASH"). */
+      CARD_TYPE: Deno.env.get("PF_CARD_TYPE") ?? "CARD",
       ...(returnUrl ? { RETURN_URL: toHex(`${returnUrl}?order=${order.id}`) } : {}),
     });
 
