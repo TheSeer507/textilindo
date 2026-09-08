@@ -54,6 +54,9 @@ export function OrdersTable() {
   const live = orders.filter((o) => o.status !== "cancelled");
   const revenue = live.reduce((s, o) => s + Number(o.total), 0);
   const pending = orders.filter((o) => o.status === "pending").length;
+  const toVerify = orders.filter(
+    (o) => o.status === "pending" && o.payment_ref?.startsWith("reportado:")
+  ).length;
 
   return (
     <section className="mt-12">
@@ -71,7 +74,11 @@ export function OrdersTable() {
         <Stat label="Pedidos" value={live.length} />
         <Stat label="Ingresos" value={money(revenue)} accent />
         <Stat label="Ticket promedio" value={live.length ? money(revenue / live.length) : "—"} />
-        <Stat label="Pendientes" value={pending} warn={pending > 0} />
+        <Stat
+          label={toVerify > 0 ? "Verificar pago" : "Pendientes"}
+          value={toVerify > 0 ? toVerify : pending}
+          warn={pending > 0 || toVerify > 0}
+        />
       </div>
 
       {error && (
@@ -123,7 +130,19 @@ export function OrdersTable() {
                     className="border-t border-slate-800 cursor-pointer hover:bg-slate-800/50"
                     title="Ver los productos del pedido"
                   >
-                    <td className="px-4 py-3 font-black tabular-nums">#{o.order_number}</td>
+                    <td className="px-4 py-3 font-black tabular-nums">
+                      #{o.order_number}
+                      {/* Pago que el cliente reportó pero que nadie confirmó
+                          contra PagueloFacil. No es venta hasta cotejarlo. */}
+                      {o.status === "pending" && o.payment_ref?.startsWith("reportado:") && (
+                        <span
+                          title={"Cotejar en PagueloFacil: " + o.payment_ref.replace("reportado:", "")}
+                          className="block mt-1 text-[10px] font-bold text-amber-400 normal-case"
+                        >
+                          verificar pago
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-slate-400 tabular-nums whitespace-nowrap">
                       {new Date(o.created_at).toLocaleDateString("es-PA", {
                         day: "2-digit", month: "short",

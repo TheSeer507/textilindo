@@ -12,7 +12,7 @@
     "sb:login": "supabase login",
     "sb:link": "supabase link --project-ref ulqkkqsoyqgzdzhbqspz",
     "sb:secrets": "supabase secrets set --env-file supabase/functions/.env",
-    "sb:deploy": "supabase functions deploy paguelofacil-checkout && supabase functions deploy paguelofacil-webhook --no-verify-jwt",
+    "sb:deploy": "supabase functions deploy paguelofacil-checkout && supabase functions deploy paguelofacil-verify && supabase functions deploy paguelofacil-webhook --no-verify-jwt",
     "sb:serve": "supabase functions serve --env-file supabase/functions/.env",
     "sb:logs": "supabase functions logs paguelofacil-webhook"
   },
