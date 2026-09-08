@@ -50,9 +50,23 @@ export const PAYMENT_METHODS = [
   {
     id: "paguelofacil",
     label: "💳 Tarjeta (PagueloFacil)",
-    tag: "PRUEBAS",
+    tag: "PRÓXIMAMENTE",
     desc: "Visa, Mastercard y Clave en línea. Pagas en la página segura de PagueloFacil.",
-    enabled: true,
+    /* Apagado en producción a propósito.
+       Toda la plomería ya funciona (Edge Functions desplegadas, pedido
+       guardado, verificación), pero las credenciales son del ambiente
+       DEMO: un cliente real que elija tarjeta terminaría en un checkout
+       de prueba que no cobra. Peor que no ofrecer la opción.
+
+       Para encender:
+         1. credenciales reales de app.paguelofacil.com
+         2. PF_ENV=production en supabase/functions/.env
+         3. npm run sb:secrets && npm run sb:deploy
+         4. enabled: true y tag: "PAGO SEGURO"
+
+       Para probar en local sin publicarlo, basta con poner true aquí
+       y no subir el cambio. */
+    enabled: false,
     /* "redirect" le dice al carrito que NO abra WhatsApp: este método
        manda al cliente a la pasarela. El pedido tiene que estar guardado
        antes, porque el monto se relee en el servidor a partir del id. */
