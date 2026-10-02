@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "images": "node scripts/optimize-images.mjs src/assets",
+    "catalog:photos": "node scripts/build-catalog-photos.mjs",
     "sb:login": "supabase login",
     "sb:link": "supabase link --project-ref ulqkkqsoyqgzdzhbqspz",
     "sb:secrets": "supabase secrets set --env-file supabase/functions/.env",

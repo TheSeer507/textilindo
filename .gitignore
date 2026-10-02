@@ -34,3 +34,8 @@ dist-ssr
 # Supabase CLI
 supabase/.temp
 supabase/.branches
+
+# Collages originales del fotógrafo (34 MB). La tienda usa las fotos ya
+# limpias de src/assets/catalogo/, que sí se versionan; estos son solo la
+# materia prima de `npm run catalog:photos`.
+fotos-originales/
