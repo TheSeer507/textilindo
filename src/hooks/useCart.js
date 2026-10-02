@@ -1,10 +1,12 @@
 import { useState, useCallback, useRef, useMemo } from "react";
-import { PRODUCTS } from "../data/products";
+import { PRODUCTS, hasPrice } from "../data/products";
 import { calcTotals } from "../config/store";
 
 const clamp = (id, qty) => {
   const product = PRODUCTS.find((p) => p.id === id);
-  const max = product ? product.stock : Infinity;
+  // Un producto sin `stock` no lleva control de existencias: sin el ??
+  // Math.min(qty, undefined) daría NaN y el carrito guardaría basura.
+  const max = product?.stock ?? Infinity;
   return Math.max(0, Math.min(qty, max));
 };
 
@@ -21,7 +23,9 @@ export function useCart() {
 
   const addToCart = useCallback((id) => {
     const product = PRODUCTS.find((p) => p.id === id);
-    if (!product) return;
+    // Sin precio no hay nada que cobrar: esos productos se consultan por
+    // WhatsApp. La interfaz ya no les ofrece el botón; esto es el seguro.
+    if (!product || !hasPrice(product)) return;
 
     setCart((c) => {
       const cur = c[id] || 0;

@@ -16,6 +16,9 @@ npm run dev      # servidor local en http://localhost:5173
 npm run build    # genera dist/ para producción
 npm run preview  # revisa el dist/ ya compilado
 npm run lint     # eslint
+
+npm run catalog:photos  # convierte los collages del fotógrafo en fotos de catálogo
+npm run images          # comprime las fotos sueltas de src/assets/tienda y about
 ```
 
 ---
@@ -31,18 +34,38 @@ npm run lint     # eslint
 | Colores y tipografía de marca       | `src/index.css` (bloque `@theme`) |
 | Texto del Hero / Nosotros / Footer  | `src/components/…`                |
 
-### Agregar un producto
+### Ponerle precio a un producto
 
-1. Pon la foto en `src/assets/tienda/`.
-2. Impórtala arriba en `src/data/products.js`.
-3. Agrega el objeto al array `PRODUCTS` (`id`, `name`, `category`, `price`,
-   `stock`, `images: [tuFoto]`, …).
+Los productos del inventario real están en `src/data/products.js` como
+`item(id, nombre, categoría, descripción)`. Mientras no tengan precio salen
+como **"Precio a consultar"** y su botón abre WhatsApp. Para venderlos por el
+carrito basta con agregar el precio:
 
-`stock: 0` muestra "Agotado" y bloquea el botón; `stock ≤ 5` muestra "¡Quedan N!".
+```js
+item("organza", "Organza", "Organza", "…descripción…", { price: 2.95 })
+```
 
-> **Comprime las fotos antes de subirlas.** Varias imágenes actuales pesan
-> ~500 KB. Pásalas a WebP de ancho ≤ 1600 px para que el sitio cargue rápido
-> en datos móviles.
+Opcionales en el mismo objeto: `stock` (0 = "Agotado", ≤ 5 = "¡Quedan N!"; sin
+ponerlo no se controla), `compareAt` (precio anterior, tachado), `badge`
+("Nuevo", "Oferta"…) y `cost` (para la tabla de márgenes del panel).
+
+La **categoría** es simplemente el tercer dato: escribir una que no existe la
+crea, y su pastilla de filtro aparece sola.
+
+### Agregar fotos o productos nuevos
+
+El fotógrafo manda collages (dos o tres fotos pegadas, con un recuadro blanco
+que dice el nombre). El script los separa en fotos limpias y recorta el recuadro:
+
+1. Pon los collages en `fotos-originales/<carpeta>/`. Esa carpeta **no se sube
+   a git** (pesa 34 MB); lo que se versiona es el resultado.
+2. En `scripts/build-catalog-photos.mjs`, agrega en `CATALOG` qué parte de qué
+   collage va con qué producto (arriba, abajo-izquierda…). Hay ejemplos de
+   todos los casos.
+3. `npm run catalog:photos` — si olvidaste asignar alguna foto, te lo avisa.
+4. Revisa el resultado en `src/assets/catalogo/<producto>/`.
+5. Si el producto es nuevo, agrégale su `item(...)` en `src/data/products.js`
+   con el mismo `id` que la carpeta. Las fotos se enlazan solas.
 
 ---
 
@@ -81,7 +104,11 @@ Después de fijar el dominio, actualiza las URLs en `index.html`
 
 - [x] ~~Número de WhatsApp real~~ — listo: `50769413385` (WhatsApp Business).
 - [ ] **Handle de Yappy real** en `src/config/store.js` (ahora `@textilindo`).
-- [ ] Subir `public/og-image.jpg` (1200×630) para la vista previa al compartir
-      el link por WhatsApp o Facebook.
-- [ ] Revisar `#admin`: la ruta es pública y muestra costos y márgenes a
-      cualquiera que la escriba en la URL.
+- [x] ~~`public/og-image.jpg`~~ — listo.
+- [x] ~~`#admin` público~~ — listo: pide sesión con rol de empleado o admin.
+- [ ] **Lista de precios del inventario real.** 23 de los 24 productos reales
+      están como "Precio a consultar" (ver *Ponerle precio a un producto*).
+- [ ] Decidir qué hacer con los 10 productos de muestra del final de
+      `src/data/products.js`: sus precios, costos y existencias son de relleno.
+- [ ] Confirmar con la tienda cómo se escriben **Scall** y **Sutin** (van tal
+      como venían en los rótulos de las fotos).

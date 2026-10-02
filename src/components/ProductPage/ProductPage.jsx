@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { money, CONFIG } from "../../config/store";
-import { PRODUCTS, LOW_STOCK_THRESHOLD } from "../../data/products";
+import { PRODUCTS, LOW_STOCK_THRESHOLD, hasPrice } from "../../data/products";
 import { ImageGallery } from "../ImageGallery/ImageGallery";
 import { ProductCard } from "../ProductCard/ProductCard";
 import { WhatsAppGlyph } from "../icons/WhatsAppGlyph";
@@ -14,11 +14,26 @@ export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
   }, [product]);
 
   const inCartQty = cart[product.id] || 0;
+  const priced = hasPrice(product);
+  const onSale = priced && product.compareAt > product.price;
   const outOfStock = product.stock === 0;
   const lowStock = product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
   const atStockLimit = inCartQty >= product.stock;
 
-  const related = PRODUCTS.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
+  /* Varias categorías tienen un solo producto (Organza, Tull, Encaje…),
+     y ahí "Más de la categoría" quedaba vacío y la página terminaba en
+     seco. Se completa con los productos que siguen en el catálogo, para
+     que siempre haya a dónde seguir mirando. Sin azar: el mismo producto
+     muestra siempre las mismas sugerencias. */
+  const at = PRODUCTS.findIndex((p) => p.id === product.id);
+  const following = [...PRODUCTS.slice(at + 1), ...PRODUCTS.slice(0, at)];
+  const sameCategory = following.filter((p) => p.category === product.category);
+  // Cuatro: en móvil la grilla es de dos columnas y tres dejaban una
+  // tarjeta suelta. En escritorio (tres columnas) la cuarta se oculta.
+  const related = [...sameCategory, ...following.filter((p) => p.category !== product.category)].slice(0, 4);
+  const relatedTitle = related.every((p) => p.category === product.category)
+    ? `Más de ${product.category}`
+    : "También te puede interesar";
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
@@ -28,7 +43,10 @@ export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
 
       <div className="grid md:grid-cols-2 gap-10 md:gap-16 mt-6">
         {product.images?.length ? (
-          <ImageGallery images={product.images} alt={product.name} />
+          // `key`: sin él, la galería conserva el número de foto al pasar de un
+          // producto a otro, y venir de la foto 6 de Algodón a un producto con
+          // dos fotos dejaba la imagen rota.
+          <ImageGallery key={product.id} images={product.images} thumbs={product.minis} alt={product.name} />
         ) : (
           <div className="aspect-square rounded-xl flex items-center justify-center text-9xl" style={{ background: product.bg }}>
             <span className={outOfStock ? "opacity-40 grayscale" : ""}>{product.emoji}</span>
@@ -40,10 +58,19 @@ export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
           <h1 className="font-display font-semibold text-3xl md:text-4xl text-slate-900 mt-1 tracking-tight">
             {product.name}
           </h1>
-          <div className="mt-4 flex items-baseline gap-3">
-            <span className="font-black text-3xl text-slate-900">{money(product.price)}</span>
-            <span className="line-through text-lg text-slate-400">{money(product.compareAt)}</span>
-          </div>
+          {priced ? (
+            <div className="mt-4 flex items-baseline gap-3">
+              <span className="font-black text-3xl text-slate-900">{money(product.price)}</span>
+              {onSale && <span className="line-through text-lg text-slate-400">{money(product.compareAt)}</span>}
+            </div>
+          ) : (
+            <div className="mt-4">
+              <p className="font-black text-2xl text-slate-900">Precio a consultar</p>
+              <p className="text-sm text-slate-500 mt-1">
+                Te lo damos al momento por WhatsApp, junto con los colores disponibles.
+              </p>
+            </div>
+          )}
 
           {outOfStock ? (
             <p className="text-sm font-semibold text-slate-500 mt-3">Agotado por ahora</p>
@@ -53,6 +80,21 @@ export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
 
           <p className="text-slate-600 mt-5 leading-relaxed max-w-md">{product.desc}</p>
 
+          {/* Sin precio publicado no hay carrito: la única acción es
+              preguntar, así que WhatsApp pasa a ser el botón principal. */}
+          {!priced ? (
+            <div className="mt-8">
+              <a
+                href={buildChatLink({ productName: product.name, askPrice: true })}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 h-14 font-black px-8 rounded-2xl transition bg-[#0F7A40] hover:bg-[#0c6635] text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40"
+              >
+                <WhatsAppGlyph className="w-5 h-5" />
+                Consultar precio por WhatsApp
+              </a>
+            </div>
+          ) : (
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             {/* Igual que en la tarjeta: una vez que hay unidades, el botón
                 cede su lugar al control de cantidad. */}
@@ -100,6 +142,7 @@ export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
               {outOfStock ? "Avisarme por WhatsApp" : "Consultar por WhatsApp"}
             </a>
           </div>
+          )}
 
           {atStockLimit && inCartQty > 0 && (
             <p className="mt-3 text-xs font-semibold text-orange-600">
@@ -113,8 +156,8 @@ export function ProductPage({ product, cart, onAdd, onChangeQty, onRemove }) {
 
       {related.length > 0 && (
         <div className="mt-20">
-          <h2 className="font-display font-semibold text-2xl tracking-tight mb-6">Más de {product.category}</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
+          <h2 className="font-display font-semibold text-2xl tracking-tight mb-6">{relatedTitle}</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7 lg:[&>*:nth-child(n+4)]:hidden">
             {related.map((p) => (
               <ProductCard
                 key={p.id}

@@ -21,7 +21,7 @@ export function CartItemsView({ items, totals, changeQty, removeItem }) {
               queda solo como respaldo si un producto no tiene fotos. */}
           {product.images?.length ? (
             <img
-              src={product.images[0]}
+              src={product.thumb ?? product.images[0]}
               alt={product.name}
               loading="lazy"
               className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-200"

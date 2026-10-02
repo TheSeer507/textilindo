@@ -3,7 +3,10 @@ import { ZoomIn, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const ZOOM_SCALE = 2.5;
 
-export function ImageGallery({ images, alt }) {
+/* `thumbs` (opcional) son versiones chiquitas de las mismas fotos, en el
+   mismo orden, para la tira de abajo. Sin ellas la tira usa las fotos
+   completas, que es lo que hacen los productos de muestra. */
+export function ImageGallery({ images, thumbs, alt }) {
   const [index, setIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [hovering, setHovering] = useState(false);
@@ -122,7 +125,7 @@ export function ImageGallery({ images, alt }) {
                 (i === index ? "border-brand-primary" : "border-transparent opacity-60 hover:opacity-100")
               }
             >
-              <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
+              <img src={thumbs?.[i] ?? src} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />
             </button>
           ))}
         </div>

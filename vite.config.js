@@ -7,6 +7,14 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
 
   build: {
+    /* Nunca incrustar imágenes dentro del JavaScript.
+       Vite convierte a base64 todo archivo de menos de 4 KB, y las
+       miniaturas de la galería pesan justo eso: 28 de ellas terminaron
+       dentro del paquete principal, que pasó de 20 a 100 KB (gzip) para
+       TODOS los visitantes, vean o no un producto. Como archivos sueltos
+       solo se descargan al abrir la galería que las usa. */
+    assetsInlineLimit: 0,
+
     rollupOptions: {
       output: {
         /* Separar las librerías del código propio.

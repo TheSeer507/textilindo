@@ -115,9 +115,18 @@ export default function CatalogStore() {
           <Hero />
 
           <main className="max-w-6xl mx-auto px-4 py-16 md:py-20">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-              <h2 className="font-display font-semibold text-3xl tracking-tight">Catálogo</h2>
-              <CategoryChips active={category} onSelect={setCategory} />
+            {/* Las categorías van debajo del título, a todo el ancho: con el
+                inventario real son 18 y ya no caben a la derecha de él. */}
+            <div className="mb-8">
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 className="font-display font-semibold text-3xl tracking-tight">Catálogo</h2>
+                <p className="text-sm text-slate-500 tabular-nums">
+                  {visible.length} {visible.length === 1 ? "producto" : "productos"}
+                </p>
+              </div>
+              <div className="mt-5">
+                <CategoryChips active={category} onSelect={setCategory} />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">

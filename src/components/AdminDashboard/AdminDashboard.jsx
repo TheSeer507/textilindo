@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { CONFIG, money } from "../../config/store";
-import { PRODUCTS } from "../../data/products";
+import { PRODUCTS, hasPrice } from "../../data/products";
 import { OrdersTable } from "./OrdersTable";
 import { UsersTable } from "./UsersTable";
 
@@ -15,10 +15,16 @@ import { UsersTable } from "./UsersTable";
 export function AdminDashboard({ profile, isAdmin, onSignOut }) {
   const [fixed, setFixed] = useState(300);
 
-  const rows = PRODUCTS.map((p) => {
-    const freight = p.weightKg * p.shipPerKg;
+  /* El margen solo se puede calcular donde hay precio Y costo. El
+     inventario real todavía no trae ninguno de los dos; meterlo en la
+     tabla daría NaN en cada celda, así que se cuenta aparte y se avisa. */
+  const costed = PRODUCTS.filter((p) => hasPrice(p) && typeof p.cost === "number");
+  const uncosted = PRODUCTS.length - costed.length;
+
+  const rows = costed.map((p) => {
+    const freight = (p.weightKg ?? 0) * (p.shipPerKg ?? 0);
     const dutiable = p.cost + freight;
-    const duties = dutiable * (p.tariffPct / 100);
+    const duties = dutiable * ((p.tariffPct ?? 0) / 100);
     const landed = dutiable + duties + CONFIG.shippingFlat; // last-mile approximated by your flat rate
     const profit = p.price - landed;
     const margin = (profit / p.price) * 100;
@@ -26,7 +32,7 @@ export function AdminDashboard({ profile, isAdmin, onSignOut }) {
   }).sort((a, b) => b.profit - a.profit);
 
   const best = rows[0];
-  const breakEven = best.profit > 0 ? Math.ceil(fixed / best.profit) : null;
+  const breakEven = best && best.profit > 0 ? Math.ceil(fixed / best.profit) : null;
 
   return (
     <div className="min-h-screen bg-slate-900 text-white font-mono">
@@ -75,6 +81,13 @@ export function AdminDashboard({ profile, isAdmin, onSignOut }) {
           </table>
         </div>
 
+        {uncosted > 0 && (
+          <p className="mt-3 text-xs text-slate-500">
+            {uncosted} {uncosted === 1 ? "producto no aparece" : "productos no aparecen"} en esta tabla
+            porque todavía no {uncosted === 1 ? "tiene" : "tienen"} precio o costo cargado.
+          </p>
+        )}
+
         <div className="mt-6 grid sm:grid-cols-2 gap-5">
           <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
             <label className="text-xs uppercase tracking-widest text-slate-400 block mb-2">Costos fijos mensuales (ads + herramientas)</label>
@@ -86,7 +99,9 @@ export function AdminDashboard({ profile, isAdmin, onSignOut }) {
           <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
             <p className="text-xs uppercase tracking-widest text-slate-400">Punto de equilibrio (con tu mejor producto)</p>
             <p className="font-black text-3xl mt-2 text-amber-400">{breakEven === null ? "∞" : breakEven + " uds/mes"}</p>
-            <p className="text-xs text-slate-500 mt-1">vendiendo {best.emoji} {best.name}</p>
+            <p className="text-xs text-slate-500 mt-1">
+              {best ? <>vendiendo {best.emoji} {best.name}</> : "aún no hay productos con precio y costo"}
+            </p>
           </div>
         </div>
 
