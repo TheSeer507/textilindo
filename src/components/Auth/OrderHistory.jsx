@@ -82,7 +82,7 @@ export function OrderHistory() {
                 {o.order_items?.map((i) => (
                   <li key={i.id} className="flex justify-between gap-4">
                     <span className="min-w-0">
-                      <span className="tabular-nums">{i.qty}×</span> {i.product_name}
+                      <span className="tabular-nums">{i.unit === "yarda" ? `${i.qty} yd ×` : `${i.qty}×`}</span> {i.product_name}
                     </span>
                     <span className="tabular-nums shrink-0">{money(Number(i.line_total))}</span>
                   </li>

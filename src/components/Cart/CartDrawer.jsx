@@ -130,7 +130,8 @@ export function CartDrawer({ open, onClose, items, totals, changeQty, removeItem
   };
 
   const title =
-    view === "cart" ? `Tu carrito (${items.reduce((s, i) => s + i.qty, 0)})` :
+    // Renglones, igual que el contador del header: yardas y piezas no se suman.
+    view === "cart" ? `Tu carrito (${items.length})` :
     view === "shipping" ? "Datos de entrega" :
     view === "payment" ? "Método de pago" : "Pedido enviado";
 

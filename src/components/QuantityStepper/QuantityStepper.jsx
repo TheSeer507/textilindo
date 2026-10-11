@@ -1,20 +1,26 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { lineName, unitOf } from "../../utils/catalog";
 
 /* ==============================================================
    CONTROL DE CANTIDAD
-   Papelera + (− n +). Reemplaza al botón "Agregar" en cuanto el
-   producto ya está en el carrito, tanto en la tarjeta del catálogo
+   Papelera + (− n +). Reemplaza al botón "Agregar" en cuanto la
+   variante ya está en el carrito, tanto en la tarjeta del catálogo
    como en la página del producto.
+
+   La cantidad va en la unidad de venta del producto: para las telas
+   son yardas ("3 yd") y cada toque suma o quita una yarda.
 
    `size`:
      "sm" → tarjetas (a 2 columnas en 360px quedan ~130px de ancho)
      "lg" → página de producto, a la altura del botón principal
 
    El "+" pasa por onAdd (no por onChangeQty) para reutilizar el
-   mismo camino de alta: respeta el stock y dispara el toast.
+   mismo camino de alta: respeta la existencia y anima el contador.
 ============================================================== */
-export function QuantityStepper({ product, qty, onAdd, onChangeQty, onRemove, size = "sm" }) {
-  const atStockLimit = qty >= product.stock;
+export function QuantityStepper({ product, variant, qty, onAdd, onChangeQty, onRemove, size = "sm" }) {
+  const name = lineName(product, variant);
+  const unit = unitOf(product);
+  const atStockLimit = qty >= (variant.stock ?? Infinity);
   const lg = size === "lg";
 
   const box = lg ? "h-14" : "h-9";
@@ -26,8 +32,8 @@ export function QuantityStepper({ product, qty, onAdd, onChangeQty, onRemove, si
   return (
     <div className={`flex items-center gap-2 ${lg ? "" : "mt-auto"}`}>
       <button
-        onClick={() => onRemove(product.id)}
-        aria-label={`Quitar ${product.name} del carrito`}
+        onClick={() => onRemove(variant.id)}
+        aria-label={`Quitar ${name} del carrito`}
         title="Quitar del carrito"
         className={`shrink-0 ${trashW} ${box} flex items-center justify-center rounded-2xl border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors`}
       >
@@ -36,8 +42,8 @@ export function QuantityStepper({ product, qty, onAdd, onChangeQty, onRemove, si
 
       <div className={`flex-1 flex items-center justify-between rounded-2xl border-2 border-brand-primary bg-brand-surface ${box} px-1.5`}>
         <button
-          onClick={() => onChangeQty(product.id, -1)}
-          aria-label={`Quitar una unidad de ${product.name}`}
+          onClick={() => onChangeQty(variant.id, -1)}
+          aria-label={`Quitar una ${unit.one} de ${name}`}
           className={`shrink-0 ${btn} flex items-center justify-center rounded-xl text-brand-primary hover:bg-brand-primary hover:text-white transition-colors`}
         >
           <Minus size={icon} strokeWidth={3} />
@@ -45,16 +51,17 @@ export function QuantityStepper({ product, qty, onAdd, onChangeQty, onRemove, si
 
         <span
           aria-live="polite"
-          className={`font-black ${num} text-brand-primary tabular-nums text-center flex-1 min-w-0`}
+          className={`font-black ${num} text-brand-primary tabular-nums text-center flex-1 min-w-0 whitespace-nowrap`}
         >
           {qty}
+          {unit.short && <span className="ml-0.5 text-[0.72em] font-bold">{unit.short}</span>}
         </span>
 
         <button
-          onClick={() => onAdd(product.id)}
+          onClick={() => onAdd(variant.id)}
           disabled={atStockLimit}
-          aria-label={`Agregar otra unidad de ${product.name}`}
-          title={atStockLimit ? `Solo quedan ${product.stock}` : undefined}
+          aria-label={`Agregar otra ${unit.one} de ${name}`}
+          title={atStockLimit ? `Solo quedan ${variant.stock}` : undefined}
           className={
             `shrink-0 ${btn} flex items-center justify-center rounded-xl transition-colors ` +
             (atStockLimit

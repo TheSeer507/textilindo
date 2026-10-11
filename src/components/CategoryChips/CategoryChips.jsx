@@ -1,5 +1,3 @@
-import { CATEGORIES } from "../../data/products";
-
 /* ==============================================================
    FILTRO DE CATEGORÍAS
    Con el inventario real son 18 pastillas, y una sola fila ya no
@@ -10,8 +8,11 @@ import { CATEGORIES } from "../../data/products";
      media pantalla antes del primer producto. La fila llega hasta
      el borde y se desvanece a la derecha, que es la pista de que
      hay más por deslizar.
+
+   `categories` llega del catálogo vigente (no de una lista fija),
+   para que una categoría aparezca o se vaya junto con sus productos.
 ============================================================== */
-export function CategoryChips({ active, onSelect }) {
+export function CategoryChips({ categories, active, onSelect }) {
   return (
     <div className="relative">
       <div
@@ -21,7 +22,7 @@ export function CategoryChips({ active, onSelect }) {
           sm:flex-wrap sm:overflow-visible sm:mx-0 sm:px-0
         "
       >
-        {CATEGORIES.map((c) => (
+        {categories.map((c) => (
           <button
             key={c}
             onClick={() => onSelect(c)}

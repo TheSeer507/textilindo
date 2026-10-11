@@ -1,3 +1,4 @@
+import { INVENTORY } from "./catalog";
 import { photos } from "./catalogPhotos";
 import mantelVinil from "../assets/tienda/1000305752.jpg";
 import telaCortinas from "../assets/tienda/1000305753.jpg";
@@ -12,134 +13,41 @@ import bolsosCarteras from "../assets/about/mercancia2.webp";
 import souvenirs from "../assets/tienda/1000379115.jpg";
 
 /* ==============================================================
-   CATÁLOGO
-   Agrega o quita productos aquí — toda la tienda se adapta, y las
-   categorías salen solas de lo que diga cada `category`.
+   CATÁLOGO QUE TRAE LA PÁGINA
+   Es la suma de dos cosas:
 
-   Hay dos generaciones de productos en el mismo arreglo:
+   1. INVENTARIO REAL — lo que vende la tienda, con sus precios.
+      Vive en src/data/catalog.js (ahí se agregan productos y se
+      escriben los precios). Aquí solo se le pegan las fotos, que se
+      enlazan solas por `id` desde src/assets/catalogo/<id>/.
 
-   1. INVENTARIO REAL (los `item(...)` de arriba). Vienen de las
-      fotos que mandó la tienda: la carpeta es la categoría y el
-      rótulo de cada foto es el producto. Sus fotos se enlazan solas
-      desde src/assets/catalogo/<id>/ (ver catalogPhotos.js).
+   2. PRODUCTOS DE MUESTRA — los que se armaron mientras llegaba el
+      inventario. Sus precios, costos y existencias son de relleno.
+      No están en la base de datos.
 
-      Casi todos van SIN `price`: la tienda todavía no entrega la
-      lista de precios, y un precio inventado en una tienda que ya
-      recibe pedidos es peor que no mostrar ninguno. Sin precio, el
-      producto sale como "Precio a consultar" y su botón abre
-      WhatsApp en vez del carrito. El día que llegue el precio basta
-      con agregarlo:
+   Todo producto sale de aquí con la misma forma:
+     { id, name, category, desc, unit, variants: [{ id, label, price }],
+       images, minis, thumb }
+   Lo que se vende es siempre una variante (ver src/utils/catalog.js).
 
-        item("organza", "Organza", "Organza", "…", { price: 2.95 })
-
-      y el producto pasa a venderse por el carrito como cualquiera.
-      Campos opcionales del mismo modo: `stock`, `compareAt`, `badge`,
-      `cost` (este último lo usa la tabla de márgenes del panel).
-
-   2. PRODUCTOS DE MUESTRA (los objetos largos de abajo). Son los que
-      se armaron mientras llegaba el inventario; sus precios, costos
-      y existencias son de relleno.
-
-   `stock` es opcional: 0 muestra "Agotado" y bloquea el carrito,
-   ≤5 muestra "¡Quedan N!"; si no se pone, no se controla.
+   Este es el catálogo "de fábrica": la página arranca con él y, en
+   cuanto la base responde, le pone encima los precios y la
+   disponibilidad del momento (src/hooks/useCatalog.js).
 ============================================================== */
 
-/** Producto del inventario real. `id` debe coincidir con su carpeta de fotos. */
-const item = (id, name, category, desc, extra) => ({ id, name, category, desc, ...photos(id), ...extra });
+/** Inventario real + sus fotos. */
+const REAL = INVENTORY.map((product) => ({ ...product, ...photos(product.id) }));
 
-export const PRODUCTS = [
-  // ---------------- Algodón ----------------
-  item(
-    "algodon", "Algodón", "Algodón",
-    "Tela de algodón estampada en gran variedad de diseños: florales, cuadros, rayas y motivos geométricos. Fresca y fácil de coser, ideal para vestidos, blusas, camisas y manualidades."
-  ),
+/** Los de muestra se escriben "planos" y se pasan a la forma común:
+    una sola variante, que se vende por unidad y lleva su existencia.
+    `stock: 0` muestra "Agotado"; ≤ 5 muestra "¡Quedan N!". */
+const sample = ({ price, compareAt, stock, ...rest }) => ({
+  ...rest,
+  unit: "unidad",
+  variants: [{ id: rest.id, label: null, price, compareAt, stock }],
+});
 
-  // ---------------- Tela de vestidos ----------------
-  item(
-    "satin", "Satín", "Tela de vestidos",
-    "Satín liso de brillo intenso y tacto sedoso, en gran variedad de colores. Para vestidos de fiesta, forros, lazos, manteles y decoración de eventos."
-  ),
-  item(
-    "crepe-satinado", "Crepe satinado", "Tela de vestidos",
-    "Crepe de acabado satinado, con brillo suave y muy buena caída. En colores como rojo, vino, blanco y champán. Para vestidos de fiesta, blusas y faldas."
-  ),
-  item(
-    "poplin", "Poplin", "Tela de vestidos",
-    "Poplin liso, fresco y de tacto suave, en colores vivos y pasteles: morado, verde, amarillo claro, azul, lila y fucsia. Para vestidos, blusas, camisas y forros."
-  ),
-  // "Scall" y "Sutin" van escritos tal como los rotuló la tienda.
-  item(
-    "scall", "Scall", "Tela de vestidos",
-    "Tela lisa para vestidos, de tejido fino y cuerpo ligero. En colores como amarillo, rojo, azul marino, azul rey, vino, naranja y crema."
-  ),
-  item(
-    "sutin", "Sutin", "Tela de vestidos",
-    "Tela lisa para vestidos, de acabado mate y tacto suave. En colores como lila, blanco, rojo, amarillo, verde, azul rey, menta y azul marino."
-  ),
-  item(
-    "tela-de-cuadritos", "Tela de cuadritos", "Tela de vestidos",
-    "Tela de cuadritos tipo vichy en muchos colores: naranja, rojo, azul, verde, amarillo, rosado, morado y más. Un clásico para vestidos, blusas, delantales y manteles."
-  ),
-
-  // ---------------- Chifón ----------------
-  item(
-    "chifon", "Chifón", "Chifón",
-    "Chifón liso, liviano y semitransparente, de caída vaporosa. En colores como crema, verde limón, coral, azul, fucsia y rosado. Para vestidos, blusas, pañuelos y sobrefaldas."
-  ),
-  item(
-    "chifon-estampado-lentejuelas", "Chifón estampado con lentejuelas", "Chifón",
-    "Chifón liviano con estampados florales y pequeñas lentejuelas que le dan brillo. Varios diseños y colores, para vestidos, blusas y prendas de fiesta."
-  ),
-
-  // ---------------- Una tela por categoría ----------------
-  item(
-    "organza", "Organza", "Organza",
-    "Organza de brillo tornasolado y cuerpo firme, en colores como naranja, rojo, azul, gris y cobre. Para vestidos de fiesta, sobrefaldas, lazos y decoración de eventos."
-  ),
-  item(
-    "tull", "Tull", "Tull",
-    "Tull liviano en colores vivos y neón, y también con brillo escarchado. Para tutús, velos, vestidos de fiesta, lazos y decoración."
-  ),
-  item(
-    "encaje", "Encaje", "Encaje",
-    "Tela de encaje con diseño floral, en colores como turquesa, verde, naranja, fucsia, beige y azul. Para vestidos, blusas, sobrefaldas y detalles de costura."
-  ),
-  item(
-    "tela-para-toalla", "Tela para toalla", "Tela para toalla",
-    "Tela de toalla suave y absorbente, en blanco, rosado y rojo. Para toallas, batas, baberos y artículos de bebé."
-  ),
-  item(
-    "tela-para-sueter", "Tela para suéter", "Tela para suéter",
-    "Tela de punto para confeccionar suéteres y camisetas. En colores como verde, turquesa, mostaza, azul marino y coral."
-  ),
-  item(
-    "tela-tapiz", "Tela tapiz", "Tela tapiz",
-    "Tela de tapicería gruesa y resistente, con diseños geométricos en varios colores. Para tapizar muebles, cojines, cortinas y proyectos de decoración."
-  ),
-  item(
-    "telas-navidenas", "Telas navideñas", "Telas navideñas",
-    "Telas con estampados de Navidad: Santa Claus, flores de pascua, bastones de caramelo y más motivos festivos. Para manteles, caminos de mesa, cojines, botas y decoración de temporada."
-  ),
-
-  // ---------------- Tela para sabanillas ----------------
-  item(
-    "lanilla", "Lanilla", "Tela para sabanillas",
-    "Lanilla suave y abrigada con estampados infantiles: animalitos, ballenas, lunares y más. Para sabanillas, pijamas y ropa de bebé."
-  ),
-  item(
-    "frazadas", "Frazadas", "Tela para sabanillas",
-    "Tela para frazadas, suave y abrigada, con estampados infantiles y de personajes. Para frazadas, mantas y cobijas de bebé."
-  ),
-  item(
-    "panos-colcha-bebe", "Paños para colcha de bebés", "Tela para sabanillas",
-    "Paños estampados para armar colchas de bebé, con ositos y motivos infantiles en tonos pastel. También hay tela acolchada en rollo."
-  ),
-
-  // ---------------- Hilos ----------------
-  item(
-    "hilos-de-tejer", "Hilos de tejer", "Hilos",
-    "Hilos y estambres para tejer a crochet o a dos agujas, en decenas de colores: acrílicos, de algodón, matizados y para amigurumi. También agujas de crochet y de tejer."
-  ),
+const SAMPLES = [
   {
     id: "hilo-bordar",
     name: "Hilo de bordar multicolor",
@@ -153,27 +61,6 @@ export const PRODUCTS = [
     stock: 200,
     images: [hiloBordar1, hiloBordar2],
   },
-
-  // ---------------- Sedería ----------------
-  item(
-    "encajes-y-puntillas", "Encajes y puntillas", "Sedería",
-    "Encajes y puntillas blancas en tira, en distintos anchos y diseños. Para ribetear vestidos, blusas, manteles, cortinas y ropa de bebé."
-  ),
-  item(
-    "colorante-mariposa", "Colorante para ropa Mariposa", "Sedería",
-    "Colorante para ropa marca Mariposa, en cristales de color. Caja de 32 g. Colores: azul claro, azul marino, castaño oscuro y rojo escarlata, entre otros.",
-    // Único precio real del lote: es el que marca la etiqueta de cada
-    // caja en la foto (tomada el 3-sep-2026). Confirmar con la tienda.
-    { price: 2.5 }
-  ),
-  item(
-    "bolsas-de-regalo", "Bolsas de regalo de papel", "Sedería",
-    "Bolsas de papel con asas para regalo, en varios tamaños y colores: kraft, blanco, negro, naranja, verde y más. Se venden por unidad o por docena."
-  ),
-  item(
-    "papel-en-rollo", "Papel en rollo de colores", "Sedería",
-    "Papel en rollo de colores lisos para envolver regalos, manualidades y decoración: negro, verde, azul, amarillo, gris, blanco, rojo, rosado y kraft."
-  ),
   {
     id: "hilo-costura",
     name: "Hilo de coser y mercería",
@@ -200,8 +87,6 @@ export const PRODUCTS = [
     stock: 0,
     images: [cintasAdornos],
   },
-
-  // ================= Productos de muestra =================
   {
     id: "tela-cortinas",
     name: "Tela decorativa para cortinas",
@@ -293,11 +178,20 @@ export const PRODUCTS = [
     stock: 60,
     images: [souvenirs],
   },
-];
+].map(sample);
 
-export const CATEGORIES = ["Todos", ...new Set(PRODUCTS.map((p) => p.category))];
+/* El inventario real va primero. Después se agrupa por categoría, en
+   el orden en que cada una aparece por primera vez, para que un
+   producto de muestra de "Hilos" quede junto a los hilos de verdad y
+   no perdido al final. (sort es estable: dentro de cada categoría se
+   respeta el orden en que están escritos.) */
+const ALL = [...REAL, ...SAMPLES];
+const categoryOrder = [...new Set(ALL.map((p) => p.category))];
+export const PRODUCTS = [...ALL].sort(
+  (a, b) => categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category)
+);
+
+/** Categorías de una lista de productos, en orden de aparición, con "Todos" al frente. */
+export const categoriesOf = (products) => ["Todos", ...new Set(products.map((p) => p.category))];
 
 export const LOW_STOCK_THRESHOLD = 5;
-
-/** ¿Tiene precio publicado? Sin precio, el producto se consulta por WhatsApp. */
-export const hasPrice = (p) => typeof p?.price === "number";

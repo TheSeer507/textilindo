@@ -185,7 +185,8 @@ export function OrdersTable() {
                         <ul className="space-y-1 text-slate-300">
                           {o.order_items?.map((i) => (
                             <li key={i.id} className="flex justify-between max-w-md">
-                              <span>{i.qty}× {i.product_name}</span>
+                              {/* `unit` dice si la cantidad son yardas de tela o piezas. */}
+                              <span>{i.unit === "yarda" ? `${i.qty} yd ×` : `${i.qty}×`} {i.product_name}</span>
                               <span className="tabular-nums">{money(Number(i.line_total))}</span>
                             </li>
                           ))}

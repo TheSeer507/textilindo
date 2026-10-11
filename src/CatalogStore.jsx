@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { PRODUCTS } from "./data/products";
+import { categoriesOf } from "./data/products";
+import { useCatalog } from "./hooks/useCatalog";
 import { useCart } from "./hooks/useCart";
 import { useAuth } from "./hooks/useAuth";
 import { useHashRoute } from "./hooks/useHashRoute";
@@ -32,7 +33,10 @@ const AdminDashboard = lazy(() =>
 export default function CatalogStore() {
   const route = useHashRoute();
   const auth = useAuth();
-  const { cart, addToCart, changeQty, removeItem, count, lastAdded, items, totals } = useCart();
+  // Catálogo vigente: el que trae la página, con los precios y la
+  // disponibilidad de la base encima en cuanto responde.
+  const { products } = useCatalog();
+  const { cart, addToCart, changeQty, removeItem, count, lastAdded, items, totals } = useCart(products);
   const [category, setCategory] = useState("Todos");
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -67,13 +71,18 @@ export default function CatalogStore() {
     );
   }
 
-  const visible = category === "Todos" ? PRODUCTS : PRODUCTS.filter((p) => p.category === category);
+  /* Las categorías salen del catálogo vigente. Si la que estaba elegida
+     desaparece (la tienda retiró su único producto), se vuelve a "Todos"
+     en vez de dejar la grilla vacía con una pastilla que ya no existe. */
+  const categories = categoriesOf(products);
+  const activeCategory = categories.includes(category) ? category : "Todos";
+  const visible = activeCategory === "Todos" ? products : products.filter((p) => p.category === activeCategory);
   const isAbout = route === "#about";
   const isPaymentResult = route.startsWith("#pago");
   const isLogin = route === "#login";
   const isAccount = route === "#cuenta";
   const productMatch = route.match(/^#product\/(.+)$/);
-  const routedProduct = productMatch ? PRODUCTS.find((p) => p.id === productMatch[1]) : null;
+  const routedProduct = productMatch ? products.find((p) => p.id === productMatch[1]) : null;
 
   // La barra inferior se superpone al pie de página; este relleno evita
   // que tape la última fila de productos. Solo en móvil, que es donde sale.
@@ -102,6 +111,7 @@ export default function CatalogStore() {
         routedProduct ? (
           <ProductPage
             product={routedProduct}
+            products={products}
             cart={cart}
             onAdd={addToCart}
             onChangeQty={changeQty}
@@ -125,7 +135,7 @@ export default function CatalogStore() {
                 </p>
               </div>
               <div className="mt-5">
-                <CategoryChips active={category} onSelect={setCategory} />
+                <CategoryChips categories={categories} active={activeCategory} onSelect={setCategory} />
               </div>
             </div>
 
@@ -134,7 +144,7 @@ export default function CatalogStore() {
                 <ProductCard
                   key={p.id}
                   product={p}
-                  inCartQty={cart[p.id] || 0}
+                  cart={cart}
                   onAdd={addToCart}
                   onChangeQty={changeQty}
                   onRemove={removeItem}

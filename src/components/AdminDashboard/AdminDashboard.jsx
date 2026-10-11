@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { CONFIG, money } from "../../config/store";
-import { PRODUCTS, hasPrice } from "../../data/products";
+import { PRODUCTS } from "../../data/products";
+import { hasPrice } from "../../utils/catalog";
+import { CatalogTable } from "./CatalogTable";
 import { OrdersTable } from "./OrdersTable";
 import { UsersTable } from "./UsersTable";
 
 /* ==============================================================
-   ADMIN — margins for the whole catalog (#admin)
+   PANEL (#admin) — precios, rentabilidad, pedidos y usuarios
 
    Ya no es una ruta abierta: CatalogStore solo monta este panel
    cuando hay sesión con rol employee o admin. Aun así, el muro
@@ -16,19 +18,21 @@ export function AdminDashboard({ profile, isAdmin, onSignOut }) {
   const [fixed, setFixed] = useState(300);
 
   /* El margen solo se puede calcular donde hay precio Y costo. El
-     inventario real todavía no trae ninguno de los dos; meterlo en la
-     tabla daría NaN en cada celda, así que se cuenta aparte y se avisa. */
-  const costed = PRODUCTS.filter((p) => hasPrice(p) && typeof p.cost === "number");
+     inventario real ya tiene precios, pero la tienda no ha dado costos;
+     meterlo en la tabla daría NaN en cada celda, así que se cuenta
+     aparte y se avisa. Hoy solo los productos de muestra traen costo. */
+  const costed = PRODUCTS.filter((p) => typeof p.cost === "number" && hasPrice(p.variants[0]));
   const uncosted = PRODUCTS.length - costed.length;
 
   const rows = costed.map((p) => {
+    const price = p.variants[0].price;
     const freight = (p.weightKg ?? 0) * (p.shipPerKg ?? 0);
     const dutiable = p.cost + freight;
     const duties = dutiable * ((p.tariffPct ?? 0) / 100);
     const landed = dutiable + duties + CONFIG.shippingFlat; // last-mile approximated by your flat rate
-    const profit = p.price - landed;
-    const margin = (profit / p.price) * 100;
-    return { ...p, landed, profit, margin };
+    const profit = price - landed;
+    const margin = (profit / price) * 100;
+    return { ...p, price, landed, profit, margin };
   }).sort((a, b) => b.profit - a.profit);
 
   const best = rows[0];
@@ -40,7 +44,7 @@ export function AdminDashboard({ profile, isAdmin, onSignOut }) {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <p className="text-amber-400 text-xs uppercase" style={{ letterSpacing: "0.3em" }}>{CONFIG.storeName} · Operaciones</p>
-            <h1 className="font-black text-3xl mt-1">Rentabilidad del catálogo</h1>
+            <h1 className="font-black text-3xl mt-1">Panel de la tienda</h1>
             <p className="text-xs text-slate-500 mt-2">
               {profile?.full_name || profile?.email} ·{" "}
               <span className="text-amber-400">{isAdmin ? "Administrador" : "Empleado"}</span>
@@ -54,7 +58,12 @@ export function AdminDashboard({ profile, isAdmin, onSignOut }) {
           </div>
         </div>
 
-        <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-700">
+        {/* Los precios reales, tal como están en la base. Va primero: es
+            lo que la tienda consulta y cambia más seguido. */}
+        <CatalogTable isAdmin={isAdmin} />
+
+        <h2 className="font-black text-2xl mt-12">Rentabilidad del catálogo</h2>
+        <div className="mt-5 overflow-x-auto rounded-2xl border border-slate-700">
           <table className="w-full text-sm">
             <thead className="bg-slate-800 text-slate-400 uppercase text-xs">
               <tr>

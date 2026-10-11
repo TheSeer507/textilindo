@@ -67,7 +67,9 @@ export const money = (n) => CONFIG.currency + n.toFixed(2);
    base tienen que coincidir al centavo.
 ============================================================== */
 export function calcTotals(items) {
-  const subtotal = round2(items.reduce((s, i) => s + i.product.price * i.qty, 0));
+  // Cada renglón es una variante (la tela en un ancho dado, por ejemplo) y
+  // `qty` va en su unidad de venta: yardas para las telas, piezas si no.
+  const subtotal = round2(items.reduce((s, i) => s + i.variant.price * i.qty, 0));
   const shipping =
     subtotal === 0 || subtotal >= CONFIG.freeShippingOver ? 0 : CONFIG.shippingFlat;
   const taxBase = subtotal + (CONFIG.itbmsOnShipping ? shipping : 0);

@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabaseClient";
 import { normalizePanamaPhone } from "./phone";
+import { lineName, unitOf } from "./catalog";
 
 /* ==============================================================
    GUARDAR EL PEDIDO
@@ -45,10 +46,14 @@ export async function saveOrder({ items, form, payMethod, totals, userId }) {
           p_payment_method: payMethod,
           // Nombre y precio COPIADOS: si mañana sube el precio de la tela,
           // este pedido debe seguir mostrando lo que se cobró hoy.
-          p_items: items.map(({ product, qty }) => ({
+          // `unit` deja escrito si `qty` son yardas o piezas, y
+          // `variant_id` dice cuál presentación fue (el ancho, el tipo).
+          p_items: items.map(({ product, variant, qty }) => ({
             product_id: product.id,
-            product_name: product.name,
-            unit_price: product.price,
+            variant_id: variant.id,
+            product_name: lineName(product, variant),
+            unit_price: variant.price,
+            unit: unitOf(product).id,
             qty,
           })),
         });

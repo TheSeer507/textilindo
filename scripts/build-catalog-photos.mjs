@@ -36,6 +36,13 @@ import path from "node:path";
 const SRC = "fotos-originales";
 const OUT = "src/assets/catalogo";
 
+/* Carpetas dentro de fotos-originales/ que NO son fuente de fotos.
+   "Fotos_con_Precios" son los mismos collages con el precio escrito
+   encima: sirvieron para leer la lista de precios (ver
+   src/data/catalog.js), pero como foto son peores que los originales
+   porque el recuadro del precio tapa más tela. */
+const NOT_PHOTO_SOURCES = ["Fotos_con_Precios/"];
+
 const FULL_MAX = 1400; // lado mayor de la foto de galería
 const THUMB = 640;     // portada cuadrada de la tarjeta
 const MINI = 160;      // miniatura de la tira de la galería (se ve a 56 px)
@@ -78,13 +85,13 @@ const vestidos = (n) => `tela de vestidos/IMG_20260907_${n}.webp`;
    puso la MISMA foto dos veces en el collage.
 -------------------------------------------------------------- */
 const CATALOG = {
-  // ---- Algodón: tres collages con el mismo rótulo ----
-  algodon: [
-    collage(ALGODON_1, TOP),
-    collage(ALGODON_2, TOP),
+  // ---- Algodón: tres collages con el mismo rótulo, pero la tienda les
+  // puso PRECIO DISTINTO a cada uno ($4.95, $6.95 y el tercero sin
+  // precio aún). Por eso son tres productos: cada precio con sus fotos. ----
+  "algodon-estampado": [collage(ALGODON_1, TOP), collage(ALGODON_1, BOTTOM)],
+  "algodon-cuadros-rayas": [collage(ALGODON_2, TOP), collage(ALGODON_2, BL)], // BR repite la de BL
+  "algodon-floral": [
     collage(ALGODON_3, LEFT, "above"),
-    collage(ALGODON_1, BOTTOM),
-    collage(ALGODON_2, BL),
     // La columna derecha es UNA foto de cuatro rollos apilados; el
     // recuadro la parte en dos. Arriba y abajo le sobra fondo negro.
     collage(ALGODON_3, [540, 112, 1080, 1920], "above"),
@@ -127,7 +134,10 @@ const CATALOG = {
     collage("tela tapiz/IMG_20260907_125004_401.webp", BL),
     collage("tela tapiz/IMG_20260907_125004_401.webp", BR),
   ],
-  "telas-navidenas": [collage("tela navideñas/IMG_20260907_151911_539.webp", TOP), collage("tela navideñas/IMG_20260907_151911_539.webp", BL), collage("tela navideñas/IMG_20260907_151911_539.webp", BR)],
+  // La foto de abajo a la derecha (tela azul del Nacimiento) tiene su
+  // propio precio en la lista de la tienda, así que es producto aparte.
+  "telas-navidenas": [collage("tela navideñas/IMG_20260907_151911_539.webp", TOP), collage("tela navideñas/IMG_20260907_151911_539.webp", BL)],
+  "tela-navidena-nacimiento": [collage("tela navideñas/IMG_20260907_151911_539.webp", BR)],
 
   // ---- Tela para sabanillas: tres productos ----
   lanilla: [collage("tela para sabanillas/IMG_20260907_125125_670.webp", TOP), collage("tela para sabanillas/IMG_20260907_125125_670.webp", BL), collage("tela para sabanillas/IMG_20260907_125125_670.webp", BR)],
@@ -377,14 +387,34 @@ const unassigned = [];
 async function walk(dir, rel = "") {
   for (const e of await fs.readdir(dir, { withFileTypes: true })) {
     const r = rel ? `${rel}/${e.name}` : e.name;
+    if (NOT_PHOTO_SOURCES.some((skip) => `${r}/`.startsWith(skip))) continue;
     if (e.isDirectory()) await walk(path.join(dir, e.name), r);
     else if (/\.(jpe?g|png|webp)$/i.test(e.name) && !used.has(r)) unassigned.push(r);
   }
 }
 await walk(SRC);
 
+/* --- Carpetas de productos que ya no existen en CATALOG ---
+   Si un producto se renombra o se divide, su carpeta vieja se queda y
+   Vite la seguiría empaquetando. Se borra sola, pero únicamente cuando
+   TODO lo que contiene es salida de este script (mismo patrón de
+   nombres). Si hay cualquier otro archivo, no se toca y se avisa. */
+const stale = [];
+for (const e of await fs.readdir(OUT, { withFileTypes: true })) {
+  if (!e.isDirectory() || Object.hasOwn(CATALOG, e.name)) continue;
+  const inside = await fs.readdir(path.join(OUT, e.name));
+  const generated = (f) => f.startsWith(`${e.name}-`) && /-(\d\d(\.mini)?|thumb)\.webp$/.test(f);
+  if (inside.length > 0 && inside.every(generated)) {
+    await fs.rm(path.join(OUT, e.name), { recursive: true });
+    stale.push(`${e.name}/ (borrada: ${inside.length} archivos generados)`);
+  } else {
+    stale.push(`${e.name}/ (NO se borró: tiene archivos que no generó este script)`);
+  }
+}
+
 console.log(`\n${Object.keys(CATALOG).length} productos · ${photos} fotos · ${(bytes / 1024 / 1024).toFixed(1)} MB en ${OUT}/`);
 if (warnings.length) console.log("\n⚠ Para revisar:\n  " + warnings.join("\n  "));
+if (stale.length) console.log("\nCarpetas de productos que ya no están en CATALOG:\n  " + stale.join("\n  "));
 if (unassigned.length) {
   console.log(
     `\n⚠ ${unassigned.length} foto(s) en ${SRC}/ sin asignar a ningún producto:\n  ` +

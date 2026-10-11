@@ -1,6 +1,7 @@
 import { CONFIG, money } from "../config/store";
 import { PAYMENT_METHODS } from "../data/paymentMethods";
 import { displayPanamaPhone } from "./phone";
+import { lineName, unitOf } from "./catalog";
 
 /* ==============================================================
    WHATSAPP LINKS
@@ -22,12 +23,18 @@ export function waHref(text) {
    `productName` makes the greeting specific when the customer is
    looking at a product, so the rep knows what they're asking about.
 -------------------------------------------------------------- */
-export function buildChatLink({ productName, outOfStock, askPrice } = {}) {
+export function buildChatLink({ productName, outOfStock, askPrice, range, unit } = {}) {
   const hola = `¡Hola ${CONFIG.storeName}! 👋`;
   let text;
   if (productName && outOfStock) {
     // Agotado: la pregunta real es cuándo vuelve, no los detalles.
     text = `${hola} Vi que *${productName}* está agotado. ¿Cuándo lo tendrán disponible?`;
+  } else if (productName && range) {
+    // La tienda publicó más de un precio sin decir de qué depende: el
+    // cliente llega citando las cifras que vio, para que el vendedor
+    // solo tenga que decir cuál corresponde.
+    const cada = unit ? ` la ${unit}` : "";
+    text = `${hola} Me interesa *${productName}*. Vi que cuesta entre ${money(range.min)} y ${money(range.max)}${cada}. ¿Me pueden decir cuál precio aplica y los colores disponibles?`;
   } else if (productName && askPrice) {
     // Producto sin precio publicado: el vendedor recibe la pregunta ya
     // hecha, con las dos cosas que el cliente quiere saber de una tela.
@@ -52,9 +59,17 @@ export function buildWhatsAppLink(cartItems, form, payMethod, totals, orderNumbe
       ? `🛍️ *PEDIDO #${orderNumber} — ${CONFIG.storeName}*`
       : `🛍️ *NUEVO PEDIDO — ${CONFIG.storeName}*`,
     "━━━━━━━━━━━━━━━",
-    ...cartItems.map(
-      ({ product, qty }) => `▪️ ${qty}× ${product.name} — ${money(product.price * qty)}`
-    ),
+    /* El vendedor tiene que poder leer el renglón sin adivinar: cuánto
+       (en yardas si es tela), de qué (con el ancho o tipo elegido), a
+       cómo la yarda y cuánto suma.
+         ▪️ 3 yd × Organza — 120″ de ancho ($3.95/yd) — $11.85
+         ▪️ 2× Colorante para ropa Mariposa — $5.00            */
+    ...cartItems.map(({ product, variant, qty }) => {
+      const { short } = unitOf(product);
+      const amount = short ? `${qty} ${short} ×` : `${qty}×`;
+      const each = short ? ` (${money(variant.price)}/${short})` : "";
+      return `▪️ ${amount} ${lineName(product, variant)}${each} — ${money(variant.price * qty)}`;
+    }),
     "",
     `📦 *Subtotal:* ${money(totals.subtotal)}`,
     `🚚 *Envío:* ${totals.shipping === 0 ? "GRATIS 🎉" : money(totals.shipping)}`,
