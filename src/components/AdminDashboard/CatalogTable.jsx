@@ -72,10 +72,23 @@ export function CatalogTable({ isAdmin }) {
         product_variants: p.product_variants.map((v) => (v.id === variantId ? { ...v, ...patch } : v)),
       }))
     );
-    const { error } = await supabase.from("product_variants").update(patch).eq("id", variantId);
-    if (error) {
+    /* Se piden de vuelta las filas cambiadas (.select) porque un UPDATE
+       que RLS no permite NO da error: simplemente no toca ninguna fila y
+       la base responde que todo salió bien. Sin esta comprobación, a quien
+       ya no sea admin (o se le venció la sesión) la tabla le mostraría
+       como guardado un cambio que nunca llegó. */
+    const { data, error } = await supabase
+      .from("product_variants")
+      .update(patch)
+      .eq("id", variantId)
+      .select("id");
+    if (error || !data?.length) {
       setProducts(previous);
-      setError("No se pudo guardar: " + error.message);
+      setError(
+        error
+          ? "No se pudo guardar: " + error.message
+          : "El cambio no se guardó: esta sesión no tiene permiso de administrador. Vuelve a entrar e inténtalo de nuevo."
+      );
       return false;
     }
     setError("");

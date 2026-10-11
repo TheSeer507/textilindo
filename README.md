@@ -163,7 +163,8 @@ Después de fijar el dominio, actualiza las URLs en `index.html`
 - [x] ~~`#admin` público~~ — listo: pide sesión con rol de empleado o admin.
 - [x] ~~Lista de precios del inventario real~~ — llegó en oct-2026 (por yarda):
       20 de los 27 artículos tienen precio.
-- [ ] **Correr `0005_catalog.sql` y `0006_catalog_seed.sql`** en Supabase.
+- [x] ~~Correr `0005_catalog.sql` y `0006_catalog_seed.sql` en Supabase~~ — listo
+      (11-oct-2026): la tienda ya lee los precios de la base.
 - [ ] Precio de los 7 que faltan: Algodón floral, Poplin, Tela de cuadritos,
       Hilos de tejer, Encajes y puntillas, Bolsas de regalo, Papel en rollo.
 - [ ] **Scall** llegó con dos precios ($5.95 y $6.95): preguntar de qué depende
