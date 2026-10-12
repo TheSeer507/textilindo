@@ -39,8 +39,8 @@ export function ProductCard({ product, cart, onAdd, onChangeQty, onRemove }) {
   const outOfStock = only ? !isAvailable(only) : isSoldOut(product);
   const lowStock = !!only && only.stock > 0 && only.stock <= LOW_STOCK_THRESHOLD;
   const atStockLimit = !!only && inCartQty >= (only.stock ?? Infinity);
-  // La portada cuadrada pesa una fracción de la foto de galería; los
-  // productos de muestra no la tienen y usan su primera foto.
+  // La portada cuadrada pesa una fracción de la foto de galería; si un
+  // producto no la tiene, se usa su primera foto.
   const cover = product.thumb ?? product.images?.[0];
 
   return (

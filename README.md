@@ -32,7 +32,6 @@ npm run images          # comprime las fotos sueltas de src/assets/tienda y abou
 | **Un precio**, o marcar algo agotado | Panel `#admin` → *Catálogo y precios* |
 | Artículos nuevos, nombres, textos   | `src/data/catalog.js`             |
 | Fotos de los artículos              | `scripts/build-catalog-photos.mjs` |
-| Productos de muestra (los 10 viejos) | `src/data/products.js`           |
 | Métodos de pago                     | `src/data/paymentMethods.js`      |
 | Provincias de envío                 | `src/data/provinces.js`           |
 | Colores y tipografía de marca       | `src/index.css` (bloque `@theme`) |
@@ -174,7 +173,13 @@ Después de fijar el dominio, actualiza las URLs en `index.html`
 - [ ] Confirmar los nombres que se les puso a las tres fotos de Algodón
       (estampado / de cuadros y rayas / floral): la tienda las rotuló igual
       pero con precios distintos.
-- [ ] Decidir qué hacer con los 10 productos de muestra del final de
-      `src/data/products.js`: sus precios, costos y existencias son de relleno.
+- [x] ~~Productos de muestra~~ — retirados (oct-2026). El catálogo solo tiene lo
+      que está en `src/data/catalog.js`, con sus fotos en `src/assets/catalogo/`.
+- [ ] La tabla de **rentabilidad** del panel quedó vacía: solo mostraba los
+      productos de muestra, con costos inventados. Necesita el costo real de cada
+      artículo, y su fórmula (suma el envío a cada unidad) no sirve para telas
+      por yarda.
+- [ ] El texto de Google (`index.html`) y el bloque "¿Por qué elegirnos?" todavía
+      nombran molas kunas, cintas y souvenirs, que ya no están en el catálogo.
 - [ ] Confirmar con la tienda cómo se escriben **Scall** y **Sutin** (van tal
       como venían en los rótulos de las fotos).

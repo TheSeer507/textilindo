@@ -5,7 +5,7 @@ const ZOOM_SCALE = 2.5;
 
 /* `thumbs` (opcional) son versiones chiquitas de las mismas fotos, en el
    mismo orden, para la tira de abajo. Sin ellas la tira usa las fotos
-   completas, que es lo que hacen los productos de muestra. */
+   completas. */
 export function ImageGallery({ images, thumbs, alt }) {
   const [index, setIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);

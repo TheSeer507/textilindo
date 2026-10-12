@@ -30,9 +30,8 @@ export function useCart(products) {
 
   const index = useMemo(() => indexVariants(products), [products]);
 
-  // Tope de una variante: su existencia, si la lleva. Las telas del
-  // inventario real no la llevan (todavía no se controlan yardas en
-  // bodega), así que no tienen tope.
+  // Tope de una variante: su existencia, si la lleva. Hoy ninguna la
+  // lleva (todavía no se controlan yardas en bodega), así que no hay tope.
   const clamp = useCallback(
     (id, qty) => Math.max(0, Math.min(qty, index.get(id)?.variant.stock ?? Infinity)),
     [index]

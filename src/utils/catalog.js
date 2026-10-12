@@ -86,9 +86,9 @@ export function indexVariants(products) {
    - Precio, opciones, disponibilidad y unidad: los de la base. Se
      cambian desde el panel sin publicar nada.
 
-   Un producto que la base no conoce (los de muestra) queda tal cual.
-   Uno que la base conoce pero la página no, se ignora: sin fotos ni
-   descripción no hay qué mostrar.
+   Un producto que la base todavía no conoce (recién agregado al código,
+   antes de correr su SQL) queda tal cual. Uno que la base conoce pero
+   la página no, se ignora: sin fotos ni descripción no hay qué mostrar.
 ============================================================== */
 export function applyLiveCatalog(bundled, rows) {
   if (!Array.isArray(rows) || rows.length === 0) return bundled;
